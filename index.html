@@ -1,0 +1,1571 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="description" content="タロット・四柱推命・西洋占星術・数秘術の4席に問いかけて、迷いの理由を整理する占いツール。入力した情報は端末内にだけ保存されます。">
+<meta name="theme-color" content="#0D0F24">
+<meta property="og:title" content="四席会議">
+<meta property="og:description" content="四つの占いで、迷いの理由を照らす。">
+<title>四席会議</title>
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}img{max-width:100%}[hidden]{display:none!important}body{margin:0}</style>
+</head>
+<body>
+<style>
+/* Layout: 1カラム。相談入力 → 4席の投票結果(○△×) → 論点整理 → 動く月の帯 → 次の一手 → 決定ログ */
+:root{
+  --bg:#F3EEE3; --surface:#FBF8F1; --fg:#201C3D; --muted:#5A5776; --line:#D2C8B4;
+  --accent:#4A3FA0; --accent-fg:#FFFFFF; --star:rgba(74,63,160,.16); --glow:rgba(74,63,160,.07); --tsh:none; --glow-e:rgba(74,63,160,.28);
+  --y:#1B6B45; --y-bg:#DCEEE3; --n:#A8362B; --n-bg:#F6E0DB; --h:#5B4DB1; --h-bg:#E6E2F6;
+  --f-display:"Hiragino Mincho ProN","Yu Mincho","Noto Serif JP","Source Han Serif JP",serif;
+  --f-body:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Noto Sans JP",system-ui,"Apple Symbols","Segoe UI Symbol","Noto Sans Symbols","DejaVu Sans",sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+  --bg:#0D0F24; --surface:#161937; --fg:#ECE8F6; --muted:#A9A8CA; --line:#2E3366;
+  --accent:#E3BF6B; --accent-fg:#1A1530; --star:rgba(236,232,246,.55); --glow:rgba(130,120,255,.16); --tsh:0 0 16px rgba(227,191,107,.35); --glow-e:rgba(227,191,107,.6);
+  --y:#6FD6A0; --y-bg:#10352E; --n:#FF9A8B; --n-bg:#3E1F2C; --h:#A9B4FF; --h-bg:#222A5C;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D0F24; --surface:#161937; --fg:#ECE8F6; --muted:#A9A8CA; --line:#2E3366;
+  --accent:#E3BF6B; --accent-fg:#1A1530; --star:rgba(236,232,246,.55); --glow:rgba(130,120,255,.16); --tsh:0 0 16px rgba(227,191,107,.35); --glow-e:rgba(227,191,107,.6);
+  --y:#6FD6A0; --y-bg:#10352E; --n:#FF9A8B; --n-bg:#3E1F2C; --h:#A9B4FF; --h-bg:#222A5C;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background-color:var(--bg);background-image:radial-gradient(1.3px 1.3px at 12% 14%,var(--star) 50%,transparent 52%),radial-gradient(1px 1px at 38% 41%,var(--star) 50%,transparent 52%),radial-gradient(1.6px 1.6px at 71% 22%,var(--star) 50%,transparent 52%),radial-gradient(1px 1px at 86% 63%,var(--star) 50%,transparent 52%),radial-gradient(1.3px 1.3px at 24% 78%,var(--star) 50%,transparent 52%),radial-gradient(1px 1px at 58% 91%,var(--star) 50%,transparent 52%);background-size:320px 320px;color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.75;padding-inline:16px;padding-block:0}
+.wrap{max-width:760px;margin-inline:auto;padding-block:24px 56px}
+h1,h2,h3{font-family:var(--f-display);font-weight:700;line-height:1.35;text-wrap:balance;margin:0}
+p{margin:0}
+.mast{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;padding-bottom:16px;border-bottom:1px solid var(--accent);box-shadow:0 3px 0 -2px var(--bg),0 4px 0 -2px var(--line)}
+.mast .ttl{display:flex;gap:16px;align-items:center}
+.mast .emb{flex:none;width:52px;height:52px;color:var(--accent)}
+.mast h1{font-size:2.1rem;letter-spacing:.28em}
+.mast .sub{color:var(--muted);font-size:.9rem}
+.badge{font-size:.78rem;letter-spacing:.04em;border:1px solid var(--line);background:var(--surface);padding:3px 10px;border-radius:3px;color:var(--muted)}
+.tabs{display:flex;gap:4px;margin-top:6px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tab{appearance:none;background:none;border:0;border-bottom:3px solid transparent;color:var(--muted);font:inherit;font-weight:600;padding:10px 14px;cursor:pointer;white-space:nowrap}
+.tab[aria-current="page"]{color:var(--accent);border-bottom-color:var(--accent)}
+.tab:hover{color:var(--fg)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+main{display:flex;flex-direction:column;gap:20px;padding-top:20px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:20px;display:flex;flex-direction:column;gap:16px;min-width:0}
+.panel.flat{border-radius:0;border:0;padding:0;background:transparent}
+.panel h2{font-size:1.25rem;letter-spacing:.06em}
+.panel h2::before{content:"✦";color:var(--accent);font-size:.8em;margin-right:.55em}
+.panel h3{font-size:1.05rem}
+.lead{color:var(--muted)}
+.hint{color:var(--muted);font-size:.82rem;line-height:1.6}
+ul.plain{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field label,legend{font-weight:700;font-size:.9rem}
+input[type="text"],input[type="date"],input[type="time"],input[type="number"],select,textarea{width:100%;font:inherit;font-size:16px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:10px 12px;min-width:0}
+textarea{resize:vertical;min-height:5.5rem}
+.row2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,13rem),1fr));gap:16px}
+fieldset{border:0;padding:0;margin:0;display:flex;flex-direction:column;gap:6px;min-width:0}
+.choices{display:flex;flex-wrap:wrap;gap:6px 18px}
+.choices label{display:flex;align-items:center;gap:6px;font-weight:400;font-size:.95rem}
+.btns{display:flex;flex-wrap:wrap;gap:10px}
+.btn{appearance:none;font:inherit;font-weight:700;border-radius:4px;padding:11px 20px;cursor:pointer;border:1px solid var(--accent);background:var(--accent);color:var(--accent-fg)}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn.danger{border-color:var(--n);background:var(--n);color:var(--bg)}
+.btn.danger.ghost{background:transparent;color:var(--n)}
+.btn.small{padding:6px 12px;font-size:.85rem}
+.msg{padding:10px 14px;border-radius:4px;background:var(--h-bg);color:var(--fg);border:1px solid var(--line);font-size:.9rem}
+.msg.ok{background:var(--y-bg)}
+.msg.err{background:var(--n-bg)}
+.topic{display:flex;flex-direction:column;gap:6px}
+.topic .t{font-family:var(--f-display);font-size:1.5rem;font-weight:700;line-height:1.4;overflow-wrap:anywhere}
+.meta{display:flex;flex-wrap:wrap;gap:4px 16px;color:var(--muted);font-size:.85rem}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,14rem),1fr));gap:8px}
+.opt{border:1px solid var(--line);border-radius:4px;padding:8px 12px;background:var(--bg);min-width:0;overflow-wrap:anywhere}
+.opt b{display:block;font-size:.75rem;letter-spacing:.06em;color:var(--muted)}
+.verdict{display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--accent);padding-top:14px}
+.verdict .lb{font-size:.78rem;letter-spacing:.1em;color:var(--muted);font-weight:700}
+.verdict .big{font-family:var(--f-display);font-size:1.9rem;font-weight:700;line-height:1.3}
+.verdict .big.y{color:var(--y)}.verdict .big.n{color:var(--n)}.verdict .big.h{color:var(--h)}
+.seats{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,17rem),1fr));gap:12px}
+.seat{background:var(--surface);border:1px solid var(--line);border-top:2px solid var(--accent);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.seat.pending{border-style:dashed;background:transparent}
+.seat-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.seat-head .role{color:var(--muted);font-size:.8rem}
+.mark{font-family:var(--f-display);font-size:2.6rem;line-height:1;font-weight:700}
+.mark.y{color:var(--y)}.mark.n{color:var(--n)}.mark.h{color:var(--h)}.mark.p{color:var(--muted);font-size:.85rem;font-family:var(--f-body);font-weight:600}
+.pill{display:inline-block;font-size:.8rem;font-weight:700;padding:1px 10px;border-radius:3px;align-self:flex-start}
+.pill.y{background:var(--y-bg);color:var(--y)}.pill.n{background:var(--n-bg);color:var(--n)}.pill.h{background:var(--h-bg);color:var(--h)}
+.seat .sub{color:var(--muted);font-size:.82rem;line-height:1.6}
+.seat ul{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px;font-size:.88rem}
+.pillars{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;text-align:center}
+.pillar{border:1px solid var(--line);border-radius:3px;padding:4px 0;background:var(--bg);font-family:var(--f-display)}
+.pillar small{display:block;font-size:.68rem;color:var(--muted);font-family:var(--f-body)}
+.pillar b{display:block;font-size:1.3rem;line-height:1.4}
+.pillar.me{border:2px solid var(--accent)}
+.chart{display:flex;flex-direction:column;gap:2px;font-size:.88rem;font-variant-numeric:tabular-nums}
+.elem{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.eb{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.72rem;color:var(--muted)}
+.eb .bar{height:44px;width:100%;display:flex;align-items:flex-end}
+.eb .bar i{display:block;width:100%;background:var(--h);opacity:.85;border-radius:2px 2px 0 0;min-height:2px}
+.spread{display:flex;flex-direction:column;gap:10px}
+.sp{display:flex;gap:12px;align-items:flex-start}
+.sp .cap{display:flex;flex-direction:column;gap:2px;min-width:0}
+.sp .cap small{font-size:.72rem;letter-spacing:.06em;color:var(--muted);font-weight:700}
+.tcard.sm{width:60px;height:90px}
+.luckrow{display:grid;grid-template-columns:repeat(auto-fill,minmax(3.1rem,1fr));gap:4px}
+.lk{border:1px solid var(--line);border-radius:3px;text-align:center;padding:2px 0;background:var(--bg);font-family:var(--f-display)}
+.lk small{display:block;font-size:.62rem;color:var(--muted);font-family:var(--f-body)}
+.lk b{font-size:1rem}
+.lk.cur{border:2px solid var(--accent)}
+.tarot{display:flex;gap:14px;align-items:center}
+.tcard{flex:none;width:76px;height:114px;color:var(--fg);background:var(--bg);border-radius:6px;box-shadow:0 0 0 1px var(--line)}
+.tcard svg{display:block}
+.tcard .fr{stroke-width:2.5;stroke:var(--accent)}.tcard .fr2{stroke-width:.8;stroke:var(--line)}
+.tcard .ac{stroke:var(--h)}
+.tcard .tn{font-family:var(--f-display);font-size:13px;font-weight:700}
+.tcard.rev{transform:rotate(180deg)}
+.tally{color:var(--muted);font-size:.85rem}
+.points p+p{margin-top:8px}
+.strip{display:grid;grid-template-columns:repeat(auto-fill,minmax(4.4rem,1fr));gap:6px}
+.cell{border:1px solid var(--line);border-radius:3px;padding:6px 4px;text-align:center;font-size:.8rem;line-height:1.3;background:var(--bg)}
+.cell .mo{font-weight:700;display:block}
+.cell .gl{font-family:var(--f-display);font-size:1.15rem;font-weight:700;display:block}
+.cell.y .gl{color:var(--y)}.cell.n .gl{color:var(--n)}.cell.h .gl{color:var(--h)}
+.cell.y{background:var(--y-bg)}.cell.n{background:var(--n-bg)}.cell.h{background:var(--h-bg)}
+.cell.after{opacity:.45}
+.cell.now{outline:2px solid var(--accent);outline-offset:1px}
+.cell .tag{display:block;font-size:.66rem;color:var(--muted)}
+.cell.dl{border:2px solid var(--accent)}
+.mini{display:flex;justify-content:center;gap:4px;font-size:.72rem;font-weight:700}
+.mini i{font-style:normal}
+.mini i.y{color:var(--y)}.mini i.n{color:var(--n)}.mini i.h{color:var(--h)}
+.steps{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:6px}
+.disc{color:var(--muted);font-size:.8rem;line-height:1.65}
+details{border-top:1px solid var(--line);padding-top:10px}
+summary{cursor:pointer;font-weight:700;font-size:.9rem}
+details ul{margin:8px 0 0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--muted)}
+.logrow{appearance:none;font:inherit;color:inherit;text-align:left;width:100%;background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:12px 14px;cursor:pointer;display:grid;grid-template-columns:1fr auto;gap:2px 12px;align-items:center}
+.logrow:hover{border-color:var(--accent)}
+.logrow .tt{font-weight:700;overflow-wrap:anywhere}
+.logrow .st{font-size:.8rem;color:var(--muted);justify-self:end}
+.due{border:1px solid var(--h);background:var(--h-bg);border-radius:6px;padding:12px 14px;margin-bottom:16px;display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+.due p{font-size:.88rem}
+.logrow .dt{font-size:.8rem;color:var(--muted)}
+.logrow .vd{font-size:.8rem;justify-self:end;font-weight:700;text-align:right}
+.list{display:flex;flex-direction:column;gap:8px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,14rem),1fr));gap:10px}
+.stat{border:1px solid var(--line);border-radius:4px;padding:10px 12px;background:var(--bg)}
+.stat b{display:block;font-size:.78rem;color:var(--muted)}
+.stat span{font-variant-numeric:tabular-nums}
+.outcome-sum{display:flex;flex-direction:column;gap:4px}
+textarea.code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;min-height:7rem}
+.empty{text-align:center;color:var(--muted);padding:28px 8px;display:flex;flex-direction:column;gap:12px;align-items:center}
+
+.panel{background-image:radial-gradient(130% 70% at 100% 0,var(--glow),transparent 62%)}
+.panel.flat{background-image:none}
+.mast .emb{width:96px;height:96px;overflow:visible;filter:drop-shadow(0 0 9px var(--glow-e))}
+.mast .emb .rays{opacity:.75}
+.mast .emb .ring{transform-origin:60px 60px}
+.seat{background-image:radial-gradient(120% 60% at 100% 0,var(--glow),transparent 60%)}
+.seat h3{display:flex;align-items:center;gap:8px;letter-spacing:.05em}
+.seat h3 .ic{flex:none;width:22px;height:22px;color:var(--accent)}
+.verdict .big{text-shadow:var(--tsh);letter-spacing:.04em}
+.verdict .lb::before,.verdict .lb::after{content:"✦";color:var(--accent);margin:0 .5em;font-size:.9em}
+.verdict .lb{text-align:center}
+.verdict .big{text-align:center}
+.sky{display:flex;gap:14px;align-items:center;border:1px dashed var(--line);border-radius:8px;padding:10px 14px;background:var(--bg)}
+.sky svg{flex:none;width:46px;height:46px;color:var(--accent)}
+.sky b{font-family:var(--f-display);letter-spacing:.06em}
+.sky p{margin:0}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes breathe{0%,100%{opacity:.5}50%{opacity:1}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes deal{from{opacity:0;transform:translateY(-14px) scale(.9)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:no-preference){
+  .seats .seat{animation:rise .7s ease-out both}
+  .seats .seat:nth-child(2){animation-delay:.15s}.seats .seat:nth-child(3){animation-delay:.3s}.seats .seat:nth-child(4){animation-delay:.45s}
+  .mast .emb .ring{animation:spin 160s linear infinite}
+  .mast .emb .rays{animation:breathe 5s ease-in-out infinite}
+  .sp .tcard:not(.rev){animation:deal .7s ease-out both}
+  .sp:nth-child(2) .tcard{animation-delay:.2s}.sp:nth-child(3) .tcard{animation-delay:.4s}
+}
+
+.ritual{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;flex-direction:column;gap:18px;align-items:center;justify-content:center;cursor:pointer;padding:24px;text-align:center}
+.ritual .rcards{position:relative;width:150px;height:110px}
+.ritual .rc{position:absolute;left:47px;top:6px;width:56px;height:88px;border:2px solid var(--accent);border-radius:6px;background:var(--surface);color:var(--accent);display:flex;align-items:center;justify-content:center}
+.ritual .rc svg{width:30px;height:30px}
+.ritual .rc:nth-child(1){transform:translateX(-34px) rotate(-12deg)}
+.ritual .rc:nth-child(3){transform:translateX(34px) rotate(12deg)}
+.ritual p{font-family:var(--f-display);font-size:1.15rem;letter-spacing:.18em}
+@keyframes shuf1{0%,100%{transform:translateX(-34px) rotate(-12deg)}50%{transform:translateX(40px) rotate(10deg);z-index:3}}
+@keyframes shuf2{0%,100%{transform:translateX(0) rotate(0)}50%{transform:translateX(-4px) rotate(-3deg) translateY(-8px)}}
+@keyframes shuf3{0%,100%{transform:translateX(34px) rotate(12deg)}50%{transform:translateX(-40px) rotate(-10deg);z-index:3}}
+@keyframes blink{0%,100%{opacity:.55}50%{opacity:1}}
+@media (prefers-reduced-motion:no-preference){
+  .ritual .rc:nth-child(1){animation:shuf1 .9s ease-in-out infinite}
+  .ritual .rc:nth-child(2){animation:shuf2 .9s ease-in-out infinite}
+  .ritual .rc:nth-child(3){animation:shuf3 .9s ease-in-out infinite .1s}
+  .ritual p:first-of-type{animation:blink 1.2s ease-in-out infinite}
+}
+@media (prefers-reduced-motion:no-preference){.btn,.tab,.logrow{transition:background-color .15s,border-color .15s,color .15s}}
+@media (max-width:480px){.mast .emb{width:80px;height:80px}.mast h1{font-size:1.8rem}.panel{padding:16px}.verdict .big{font-size:1.6rem}}
+</style>
+
+<div class="wrap">
+  <header class="mast">
+    <div class="ttl">
+      <svg class="emb" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><defs><radialGradient id="emg"><stop offset="0" stop-color="currentColor" stop-opacity=".38"/><stop offset=".6" stop-color="currentColor" stop-opacity=".12"/><stop offset="1" stop-color="currentColor" stop-opacity="0"/></radialGradient></defs><g class="rays"><line x1="60.0" y1="13.0" x2="60.0" y2="0.0"/><line x1="72.2" y1="14.6" x2="73.7" y2="8.8"/><line x1="83.5" y1="19.3" x2="90.0" y2="8.0"/><line x1="93.2" y1="26.8" x2="97.5" y2="22.5"/><line x1="100.7" y1="36.5" x2="112.0" y2="30.0"/><line x1="105.4" y1="47.8" x2="111.2" y2="46.3"/><line x1="107.0" y1="60.0" x2="120.0" y2="60.0"/><line x1="105.4" y1="72.2" x2="111.2" y2="73.7"/><line x1="100.7" y1="83.5" x2="112.0" y2="90.0"/><line x1="93.2" y1="93.2" x2="97.5" y2="97.5"/><line x1="83.5" y1="100.7" x2="90.0" y2="112.0"/><line x1="72.2" y1="105.4" x2="73.7" y2="111.2"/><line x1="60.0" y1="107.0" x2="60.0" y2="120.0"/><line x1="47.8" y1="105.4" x2="46.3" y2="111.2"/><line x1="36.5" y1="100.7" x2="30.0" y2="112.0"/><line x1="26.8" y1="93.2" x2="22.5" y2="97.5"/><line x1="19.3" y1="83.5" x2="8.0" y2="90.0"/><line x1="14.6" y1="72.2" x2="8.8" y2="73.7"/><line x1="13.0" y1="60.0" x2="0.0" y2="60.0"/><line x1="14.6" y1="47.8" x2="8.8" y2="46.3"/><line x1="19.3" y1="36.5" x2="8.0" y2="30.0"/><line x1="26.8" y1="26.8" x2="22.5" y2="22.5"/><line x1="36.5" y1="19.3" x2="30.0" y2="8.0"/><line x1="47.8" y1="14.6" x2="46.3" y2="8.8"/></g><circle cx="60" cy="60" r="46" fill="url(#emg)" stroke="none"/><circle cx="60" cy="60" r="44"/><circle cx="60" cy="60" r="41.5" stroke-width=".7"/><g class="ring"><line x1="60.0" y1="31.0" x2="60.0" y2="19.0" stroke-width=".8"/><line x1="74.5" y1="34.9" x2="80.5" y2="24.5" stroke-width=".8"/><line x1="85.1" y1="45.5" x2="95.5" y2="39.5" stroke-width=".8"/><line x1="89.0" y1="60.0" x2="101.0" y2="60.0" stroke-width=".8"/><line x1="85.1" y1="74.5" x2="95.5" y2="80.5" stroke-width=".8"/><line x1="74.5" y1="85.1" x2="80.5" y2="95.5" stroke-width=".8"/><line x1="60.0" y1="89.0" x2="60.0" y2="101.0" stroke-width=".8"/><line x1="45.5" y1="85.1" x2="39.5" y2="95.5" stroke-width=".8"/><line x1="34.9" y1="74.5" x2="24.5" y2="80.5" stroke-width=".8"/><line x1="31.0" y1="60.0" x2="19.0" y2="60.0" stroke-width=".8"/><line x1="34.9" y1="45.5" x2="24.5" y2="39.5" stroke-width=".8"/><line x1="45.5" y1="34.9" x2="39.5" y2="24.5" stroke-width=".8"/><text x="69.2" y="25.7" text-anchor="middle" dominant-baseline="central" font-size="9.5" fill="currentColor" stroke="none">♈&#xFE0E;</text><text x="85.1" y="34.9" text-anchor="middle" dominant-baseline="central" font-size="9.5" fill="currentColor" stroke="none">♉&#xFE0E;</text><text x="94.3" y="50.8" text-anchor="middle" dominant-baseline="central" font-size="9.5" fill="currentColor" stroke="none">♊&#xFE0E;</text><text x="94.3" y="69.2" text-anchor="middle" dominant-baseline="central" font-size="9.5" fill="currentColor" stroke="none">♋&#xFE0E;</text><text x="85.1" y="85.1" text-anchor="middle" dominant-baseline="central" font-size="9.5" fill="currentColor" stroke="none">♌&#xFE0E;</text><text x="69.2" y="94.3" text-anchor="middle" dominant-baseline="central" font-size="9.5" fill="currentColor" stroke="none">♍&#xFE0E;</text><text x="50.8" y="94.3" text-anchor="middle" dominant-baseline="central" font-size="9.5" fill="currentColor" stroke="none">♎&#xFE0E;</text><text x="34.9" y="85.1" text-anchor="middle" dominant-baseline="central" font-size="9.5" fill="currentColor" stroke="none">♏&#xFE0E;</text><text x="25.7" y="69.2" text-anchor="middle" dominant-baseline="central" font-size="9.5" fill="currentColor" stroke="none">♐&#xFE0E;</text><text x="25.7" y="50.8" text-anchor="middle" dominant-baseline="central" font-size="9.5" fill="currentColor" stroke="none">♑&#xFE0E;</text><text x="34.9" y="34.9" text-anchor="middle" dominant-baseline="central" font-size="9.5" fill="currentColor" stroke="none">♒&#xFE0E;</text><text x="50.8" y="25.7" text-anchor="middle" dominant-baseline="central" font-size="9.5" fill="currentColor" stroke="none">♓&#xFE0E;</text></g><circle cx="60" cy="60" r="29"/><circle cx="60" cy="60" r="26.5" stroke-width=".7"/><g transform="translate(60 60) scale(.78) translate(-32 -32)"><path d="M38 16a16 16 0 1 0 0 32a12.5 12.5 0 1 1 0-32Z" stroke-width="1.7"/><path d="M42.5 21l1.3 3.7l3.8.1l-3 2.4l1.1 3.7l-3.2-2.2l-3.2 2.2l1.1-3.7l-3-2.4l3.8-.1Z" stroke-width="1.2" fill="currentColor" fill-opacity=".35"/></g><path d="M60 4.5l1.6 3.4l3.4 1.6l-3.4 1.6L60 14.5l-1.6-3.4L55 9.5l3.4-1.6Z" fill="currentColor" stroke="none" transform="translate(0 -4)"/></svg>
+      <div><h1>四席会議</h1>
+      <p class="sub">四つの占いで、迷いの理由を照らす</p></div>
+    </div>
+    <span class="badge">データはこの端末の中だけ</span>
+  </header>
+  <nav class="tabs" id="tabs" aria-label="画面の切り替え"></nav>
+  <main id="app"></main>
+  <p class="disc" style="margin-top:28px">占いは未来を言い当てるものではなく、考えを整理する材料です。お金・健康・法律に関わる判断は、専門家への相談を優先してください。</p>
+</div>
+
+<script>
+(function(){
+'use strict';
+/*LOGIC_START*/
+const ST={y:{mark:'○',label:'賛成'},n:{mark:'×',label:'反対'},h:{mark:'△',label:'保留'}};
+const VAL={y:1,n:-1,h:0};
+const ROMAN=['0','I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV','XVI','XVII','XVIII','XIX','XX','XXI'];
+const SEATS=[
+  {k:'shi',name:'四柱推命',role:'生まれた暦と今年の巡りから読む',scope:'長い目で見た巡り'},
+  {k:'star',name:'西洋占星術',role:'いまの星の配置から読む',scope:'いまのタイミング'},
+  {k:'num',name:'数秘術',role:'生年月日の数字から読む',scope:'今年のテーマ'},
+  {k:'tarot',name:'タロット',role:'その場の3枚で現状・障害・助言を見る',scope:'現状の見立て'}
+];
+const KEYS=SEATS.map(function(s){return s.k;});
+
+/* ===== 共通の数学 ===== */
+const D2R=Math.PI/180;
+function rev(x){x=x%360;return x<0?x+360:x;}
+function sind(x){return Math.sin(x*D2R);}
+function cosd(x){return Math.cos(x*D2R);}
+function atan2d(y,x){return Math.atan2(y,x)/D2R;}
+
+/* ===== 数秘術 ===== */
+function reduce(n,master){
+  while(n>9){
+    if(master&&(n===11||n===22||n===33))return n;
+    n=String(n).split('').reduce(function(a,b){return a+Number(b);},0);
+  }
+  return n;
+}
+function lifePath(y,m,d){return reduce(reduce(y,true)+reduce(m,true)+reduce(d,true),true);}
+function personalYear(m,d,Y){return reduce(reduce(m)+reduce(d)+reduce(Y));}
+function personalMonth(py,mo){return reduce(py+mo);}
+
+const LP={1:'自分で切り開く',2:'調整と協調',3:'表現と楽観',4:'堅実と継続',5:'変化と自由',6:'責任と愛情',7:'探究と分析',8:'達成と管理',9:'理想と奉仕',11:'直感と感受性',22:'大きな構想の実現',33:'献身と包容'};
+
+const PY={
+  1:{t:'始まり',s:'y',x:'新しいことを始める年です。主導権を持って動くほど流れに乗りやすくなります。'},
+  2:{t:'育てる・待つ',s:'h',x:'関係や準備を丁寧に育てる年です。急いで結論を出すより、調整や情報集めが実を結びます。'},
+  3:{t:'表現・広がり',s:'y',x:'発信や交流が広がる年です。話しながら動くと道が開けますが、手を広げすぎには注意が要ります。'},
+  4:{t:'土台づくり',s:'n',x:'基盤を固める年です。大きな方向転換より、仕組みや足場を整える動きが向いています。'},
+  5:{t:'変化',s:'y',x:'環境や考え方が変わりやすい年です。動く選択が自然に噛み合いますが、勢いだけの決断には注意してください。'},
+  6:{t:'責任・調和',s:'h',x:'家族や職場など身近な人との関係が軸になる年です。周囲への影響を確認してから動くと安定します。'},
+  7:{t:'内省',s:'n',x:'立ち止まって考える年です。調べる、学ぶ、見直すことが実を結び、大きな賭けは向きにくくなります。'},
+  8:{t:'実行・成果',s:'y',x:'結果や金銭が動く年です。動けば成果が出やすい反面、契約や数字の確認が甘いと損が出やすくなります。'},
+  9:{t:'完結',s:'h',x:'ひとつの区切りをつける年です。終わらせる動きは向きますが、ゼロからの新規は次の年のほうが乗りやすくなります。'}
+};
+
+function numSeat(birth,now){
+  const p=birth.split('-').map(Number);
+  const py=personalYear(p[1],p[2],now.getFullYear());
+  const pm=personalMonth(py,now.getMonth()+1);
+  const lp=lifePath(p[0],p[1],p[2]);
+  const info=PY[py];
+  const tail={y:'動く案には追い風です。',n:'動く案には向かい風です。',h:'動く案は条件しだいです。'}[info.s];
+  return {stance:info.s,py:py,pm:pm,lp:lp,reason:'個人年'+py+'('+info.t+')。'+info.x+tail};
+}
+
+/* ===== タロット ===== */
+const MAJOR=[
+ ['愚者','新しい一歩・自由','計画より先に身軽さがあります。踏み出す余地が大きい状態です。','y','無計画・軽率','勢い任せで足元を見ていません。準備の穴が出やすい状態です。','n'],
+ ['魔術師','創造・実行力','必要な資源はそろっています。実行に移せる状態です。','y','空回り・迷い','力はあるものの方向が定まらず、手を広げすぎています。','h'],
+ ['女教皇','洞察・静観','表に出ていない情報を読み取る時期です。結論を急がないほうが合います。','h','見落とし・思い込み','大事な情報が隠れているか、思い込みで読んでいます。','n'],
+ ['女帝','豊かさ・成長','育ってきたものを広げられる状態です。環境は味方になりやすくなります。','y','停滞・過保護','居心地の良さに留まっています。育てる動きが止まりやすい状態です。','h'],
+ ['皇帝','安定・統率','意思と構造が整っています。責任を持って決められる状態です。','y','硬直・支配','こだわりが強く柔軟さを欠いています。独断で進めやすい状態です。','n'],
+ ['教皇','助言・慣例','信頼できる人や既存のやり方に学ぶ時期です。相談が効きます。','h','型破り・不信','既存のやり方から離れたい気持ちが強く、慣例を外れる選択が合います。','y'],
+ ['恋人','選択・価値観の一致','価値観に沿った選択ができています。納得して選べる状態です。','y','不一致・迷い','価値観と選択肢がずれています。本音が定まっていません。','h'],
+ ['戦車','前進・勝利','意志が定まり推進力があります。勢いを活かせる状態です。','y','暴走・制御不能','急ぎすぎているか、手綱を失っています。周囲との足並みに注意が要ります。','n'],
+ ['力','忍耐・勇気','落ち着いた強さがあります。粘り強く進められる状態です。','y','自信低下','力はあるものの、自分を信じきれていません。','h'],
+ ['隠者','内省・探求','ひとりで考えて答えを探す時期です。調べるほど見えてきます。','h','孤立・閉じこもり','考えすぎて動けないか、相談を避けています。','n'],
+ ['運命の輪','転機・流れ','状況が動き出すタイミングです。流れに乗りやすくなります。','y','停滞・ずれ','タイミングが噛み合っていません。待つほうが合います。','h'],
+ ['正義','公平・判断','事実と条件を冷静に比べる時期です。契約や数字の確認が効きます。','h','偏り・不公平','判断が偏っているか、条件が不利に傾いています。','n'],
+ ['吊るされた男','保留・視点転換','いったん止まって見方を変える時期です。急がないほうが得るものがあります。','h','徒労・先延ばし','待つだけで何も変わらない状態です。ただの先送りになっていないか確認してください。','n'],
+ ['死神','終わりと再出発','終えるべきものを終えて、次へ移る流れです。','y','執着・未練','手放せずに引きずっています。区切りが付いていません。','h'],
+ ['節制','調整・バランス','少しずつ混ぜて整える時期です。段階的に進めるのが合います。','h','偏り・過剰','バランスが崩れています。やりすぎか足りなさがあります。','n'],
+ ['悪魔','束縛・誘惑','目先の利益や依存に引かれている可能性があります。条件を疑ってください。','n','解放・脱却','縛りから抜け出す動きです。離れる決断は合いやすくなります。','y'],
+ ['塔','急変・崩れ','想定外の揺れが起きやすい状態です。今の計画に脆さがあります。','n','回避・先延ばし','避けている変化があります。向き合うタイミングが近づいています。','h'],
+ ['星','希望・回復','先の見通しが明るくなる状態です。無理なく前に進めます。','y','失望・曖昧','展望がぼやけています。理想と現実のずれを確認してください。','h'],
+ ['月','不安・不透明','情報が揃わず、不安が先に立っています。確認が先です。','h','不安の解消','見えなかったものが見えてきます。霧が晴れる流れです。','y'],
+ ['太陽','成功・明快','状況が明るく、結果が出やすい状態です。','y','楽観・遅れ','見通しが甘いか、成果が出るのが遅れます。','h'],
+ ['審判','決断・再起','過去を踏まえて決める時期です。呼ばれている感覚があります。','y','後悔・迷い','決める前に過去を引きずっています。','h'],
+ ['世界','完成・達成','ひとつの段階が整っています。次へ進む準備ができています。','y','未完・仕上げ不足','あと一歩の詰めが残っています。','h']
+];
+const SUITS=['ワンド','カップ','ソード','ペンタクル'];
+const RANKS=['エース','2','3','4','5','6','7','8','9','10','ペイジ','ナイト','クイーン','キング'];
+const RANK_SHORT=['A','2','3','4','5','6','7','8','9','10','P','Kn','Q','K'];
+const POS=['現状','障害','助言'];
+// 各スート14枚: [正位置キーワード, 正位置の見立て, 正位置の票, 逆位置キーワード, 逆位置の見立て, 逆位置の票]
+const MINOR=[
+ [
+  ['始まり・情熱','新しい挑戦への熱意と好機が生まれています。','y','出遅れ・空回り','意欲はあっても、きっかけを掴みきれずにいます。','h'],
+  ['計画・見通し','先を見据えて次の一手を考える段階です。決断の前の準備に向いています。','h','迷い・計画倒れ','見通しが定まらず、踏み出せずにいます。','h'],
+  ['展望・拡大','動かした計画が形になり始め、広がりが見えます。','y','遅れ・当てが外れる','期待した返事や成果が遅れています。','h'],
+  ['安定・祝福','一区切りがつき、落ち着いた土台ができています。','y','落ち着かない・未完','土台が固まりきらず、不安定さが残っています。','h'],
+  ['競争・意見の衝突','意見や利害がぶつかりやすい状態です。調整が要ります。','h','対立の収束・回避','衝突が収まる、または避けようとしています。','h'],
+  ['勝利・評価','努力が認められ、評価されやすい状態です。','y','評価されない・慢心','成果が正当に評価されないか、自信過剰になっています。','h'],
+  ['防衛・踏ん張り','今の立場を守るために粘る必要があります。','h','圧倒される・消耗','抱えすぎて押し切られそうな状態です。','n'],
+  ['迅速・進展','物事が一気に進みます。スピードを活かせる状態です。','y','停滞・焦り','進みが止まり、焦りが出ています。','h'],
+  ['粘り・警戒','疲れつつも最後の踏ん張りどころです。備えが要ります。','h','疲弊・限界','消耗が大きく、無理が出ています。','n'],
+  ['重荷・抱え込み','責任を背負いすぎています。負担の見直しが先です。','n','荷下ろし・手放し','重荷を下ろす、または分担する流れです。','h'],
+  ['好奇心・知らせ','新しい情報や誘いが届きます。前向きに試せます。','y','未熟・先延ばし','準備不足で、動き出しが遅れています。','h'],
+  ['行動力・突進','勢いよく動ける状態です。方向さえ合えば進みます。','y','性急・無謀','勢いが先走り、足元が見えていません。','n'],
+  ['魅力・自信','自信と温かさで周囲を巻き込める状態です。','y','嫉妬・不安定','不安から周囲に当たりやすい状態です。','h'],
+  ['統率・ビジョン','先を見通して人を動かせる状態です。','y','独断・傲慢','強引さが目立ち、周囲がついてきません。','n']
+ ],[
+  ['新しい感情・好意','新しい関係や気持ちの高まりが生まれています。','y','感情の枯渇','気持ちが動かず、空虚さがあります。','h'],
+  ['相互理解・信頼','お互いの合意と信頼が成り立つ状態です。','y','すれ違い','気持ちや条件が噛み合っていません。','h'],
+  ['祝い・仲間','仲間と喜びを分かち合える状態です。','y','過剰・噂','盛り上がりが過ぎるか、周囲の噂に振り回されています。','h'],
+  ['倦怠・見送り','目の前の機会に気持ちが乗らず、見送りがちです。','h','目覚め・新しい誘い','気づきがあり、新しい誘いに目が向きます。','y'],
+  ['喪失・後悔','失ったものに目が向いています。残っているものも見てください。','n','立ち直り・受容','気持ちを切り替えて前を向けます。','y'],
+  ['郷愁・思い出','過去の縁や慣れた環境が関わってきます。','h','過去への執着','過去に引きずられて、今が見えていません。','h'],
+  ['迷い・夢想','選択肢が多く、現実味が薄れています。','h','現実的な選択','夢想から覚めて、現実的に選べます。','y'],
+  ['離脱・探求','今のものに満足できず、次を探しに動きます。','h','未練・戻る','離れきれず、引き返したい気持ちがあります。','h'],
+  ['満足・願いの成就','望んだ形に近づき、満足感があります。','y','慢心・満たされない','満たされているのに、物足りなさが残っています。','h'],
+  ['円満・幸福','周囲も含めて満たされた状態です。','y','不和・理想とのずれ','理想と現実の間にずれが出ています。','h'],
+  ['素直な知らせ・直感','温かい知らせや直感が届きます。','y','感情的・幼さ','気分に左右され、判断が不安定です。','h'],
+  ['提案・好意の申し出','魅力的な提案が来ます。中身の確認は忘れずに。','y','気まぐれ・口先','言葉だけで中身が伴わない可能性があります。','n'],
+  ['共感・思いやり','相手の気持ちを汲み取りながら進める状態です。','h','感情過多・依存','感情に飲まれて、判断が曇りやすい状態です。','h'],
+  ['成熟・調停','感情を抑えて公平に調整できる状態です。','y','感情操作・不安定','感情が不安定で、駆け引きに傾きやすい状態です。','n']
+ ],[
+  ['明晰・決断','状況がはっきりし、決断しやすい状態です。','y','混乱・独断','考えが整理できず、独りよがりになりがちです。','h'],
+  ['膠着・保留','決められずに止まっています。情報が足りません。','h','情報の露呈・限界','隠れていた情報が出て、膠着が動き出します。','h'],
+  ['痛み・別れ','心に痛みを伴う結果が出やすい状態です。','n','癒え・回復','痛みが和らぎ、回復に向かいます。','h'],
+  ['休息・充電','いったん休んで力を蓄える時期です。','h','再始動','休養を終えて動き出せます。','y'],
+  ['勝って失う・不和','勝っても関係や信用を失いかねない状態です。','n','和解・撤退','争いをやめ、引くか和解する流れです。','h'],
+  ['移行・旅立ち','困難な場所から落ち着いた場所へ移っていく流れです。','y','抜け出せない','移りたくても、まだ抜け出せずにいます。','h'],
+  ['策略・抜け駆け','隠し事や近道の誘いがあります。慎重に。','n','発覚・正直に','隠していたことが表に出る、または正直に話せます。','h'],
+  ['束縛・思い込み','自分で動けないと思い込んでいます。','n','解放・気づき','縛りが解け、選択肢が見えてきます。','y'],
+  ['不安・不眠','不安が頭の中で膨らんでいます。事実と分けて考えてください。','n','不安の軽減','不安が軽くなり、助けを求められます。','h'],
+  ['終わり・底打ち','ひとつの終わりが来ています。これ以上は悪くなりにくい状態です。','n','回復・再生','最悪期を抜けて、立て直せます。','y'],
+  ['好奇心・情報収集','情報を集め、様子を見るのに向く状態です。','h','噂・口先','噂や表面的な情報に流されがちです。','h'],
+  ['速攻・議論','勢いよく切り込む状態です。早さは武器ですが、雑になりやすいです。','h','暴走・衝突','言い過ぎや突っ走りで衝突しやすい状態です。','n'],
+  ['冷静・明晰','感情に流されず、筋道を立てて判断できます。','y','冷淡・辛辣','厳しさが先に立ち、周囲との溝ができます。','n'],
+  ['論理・公正','論理と公正さで判断できる状態です。','y','独断・冷酷','理屈で押し切り、柔軟さを欠いています。','n']
+ ],[
+  ['好機・実利','現実的な好機や、手応えのある話が来ています。','y','機会損失','せっかくの機会を活かしきれていません。','h'],
+  ['調整・バランス','複数の事柄をやりくりしている状態です。','h','乱れ・手一杯','抱えるものが多すぎて、回らなくなっています。','n'],
+  ['協力・技能','専門性を持ち寄り、形にできる状態です。','y','連携不足','役割や連携が噛み合っていません。','h'],
+  ['保持・守り','手元のものを守る姿勢が強い状態です。','h','手放し・浪費','手放しすぎるか、逆に執着が強すぎます。','h'],
+  ['困窮・孤立','不足感や孤立を感じやすい状態です。助けを求めてください。','n','回復の兆し','支援や回復の糸口が見えてきます。','h'],
+  ['分配・援助','与え合いのバランスが取れ、支援も受けやすい状態です。','y','不均衡・条件つき','支援に条件がついたり、偏りが出ています。','h'],
+  ['見極め・待ち','育ち具合を見ながら待つ段階です。','h','徒労・見切り','成果が見合わず、方針の見直しが要ります。','h'],
+  ['修練・職人気質','地道な積み重ねが成果につながる状態です。','y','手抜き・飽き','集中力が切れ、質が落ちがちです。','h'],
+  ['自立・豊かさ','自分の力で築いた安定を楽しめる状態です。','y','依存・見かけ倒し','安定が見かけだけか、誰かに頼りすぎています。','h'],
+  ['継承・安定','長く続く土台と安定があります。','y','不安定・家庭の問題','土台が揺らぎ、身近な問題が出ています。','h'],
+  ['学び・小さな好機','学びや小さな実績を積むのに向く状態です。','y','浪費・集中力不足','気が散り、成果につながりにくい状態です。','h'],
+  ['堅実・着実','急がず確実に進める状態です。スピードは出にくいです。','h','停滞・頑固','慎重さが行き過ぎて、動きが止まっています。','h'],
+  ['豊かさ・実務','現実的な目配りで、安定を育てられる状態です。','y','過保護・金銭不安','心配が先に立ち、お金や世話に偏りがちです。','h'],
+  ['成功・資産','実績と資産に裏打ちされた安定があります。','y','強欲・頑固','利益や安全に固執し、柔軟さを失っています。','n']
+ ]
+];
+const TAROT=MAJOR.slice();
+SUITS.forEach(function(su,si){
+  MINOR[si].forEach(function(m,ri){
+    TAROT.push([su+'の'+RANKS[ri],m[0],m[1],m[2],m[3],m[4],m[5]]);
+  });
+});
+function cardArt(idx){
+  if(idx<22)return {num:ROMAN[idx],nm:TAROT[idx][0]};
+  const m=idx-22;
+  return {num:RANK_SHORT[m%14],nm:SUITS[Math.floor(m/14)]};
+}
+/* ===== カードの絵(自作の線画SVG) ===== */
+const SVGNS_OPEN='<svg viewBox="0 0 100 150" width="100%" height="100%" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false">';
+function sPath(d,cls){return '<path d="'+d+'"'+(cls?' class="'+cls+'"':'')+'/>';}
+function sCirc(x,y,r,cls){return '<circle cx="'+x+'" cy="'+y+'" r="'+r+'"'+(cls?' class="'+cls+'"':'')+'/>';}
+function sLine(x1,y1,x2,y2,cls){return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'"'+(cls?' class="'+cls+'"':'')+'/>';}
+function sRect(x,y,w,h,cls){return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'"'+(cls?' class="'+cls+'"':'')+'/>';}
+function sStar(cx,cy,R,n,r2){let d='';for(let i=0;i<n*2;i++){const a=Math.PI*i/n-Math.PI/2,r=i%2?r2:R;d+=(i?'L':'M')+(cx+r*Math.cos(a)).toFixed(1)+' '+(cy+r*Math.sin(a)).toFixed(1);}return sPath(d+'Z');}
+function sRays(cx,cy,r1,r2,n){let s='';for(let i=0;i<n;i++){const a=2*Math.PI*i/n;s+=sLine((cx+r1*Math.cos(a)).toFixed(1),(cy+r1*Math.sin(a)).toFixed(1),(cx+r2*Math.cos(a)).toFixed(1),(cy+r2*Math.sin(a)).toFixed(1));}return s;}
+function sMan(x,y,sc,pose){ // 簡易の人物(頭・胴・手足)
+  return '<g transform="translate('+x+' '+y+') scale('+sc+')">'+sCirc(0,-14,5)+sLine(0,-9,0,10)+(pose==='up'?sLine(0,-5,-9,-14)+sLine(0,-5,9,-14):sLine(0,-5,-9,3)+sLine(0,-5,9,3))+sLine(0,10,-6,24)+sLine(0,10,6,24)+'</g>';
+}
+const MAJOR_ART=[
+ function(){return sCirc(70,42,8,'ac')+sRays(70,42,11,15,8)+sPath('M12 112 L52 112 L58 124 L12 124Z')+sMan(38,88,.9,'up')+sPath('M44 80 L58 72')+sRect(55,66,8,8)+sPath('M62 112 q8-14 16-6')+sCirc(76,104,3);},
+ function(){return sPath('M30 38c0-10 14-10 20 0c6 10 20 10 20 0c0-10-14-10-20 0c-6 10-20 10-20 0Z','ac')+sMan(50,86,1,'up')+sLine(50,64,50,50)+sRect(22,108,56,8)+sLine(28,116,28,128)+sLine(72,116,72,128)+sCirc(34,102,3)+sRect(46,99,7,7)+sPath('M62 106l3-6 3 6Z');},
+ function(){return sRect(22,48,10,72)+sRect(68,48,10,72)+sPath('M44 74a14 14 0 1 0 12 22a11 11 0 1 1 -12 -22Z','ac')+sRect(40,98,20,16)+sLine(40,104,60,104)+sPath('M34 40h32');},
+ function(){return sCirc(50,40,3)+sCirc(36,46,3)+sCirc(64,46,3)+sCirc(40,32,3)+sCirc(60,32,3)+sCirc(50,70,9,'ac')+sLine(50,79,50,102)+sLine(40,90,60,90)+sPath('M20 128c0-18 6-26 12-30M80 128c0-18-6-26-12-30')+sPath('M30 128h40');},
+ function(){return sRect(32,56,36,56)+sPath('M32 56v-12M68 56v-12M32 44q-12-4-12-16M68 44q12-4 12-16','ac')+sRect(40,74,20,12)+sLine(50,100,50,126)+sPath('M44 112h12M44 120h12')+sCirc(50,40,5);},
+ function(){return sLine(50,30,50,86)+sLine(40,40,60,40)+sLine(36,52,64,52)+sLine(32,64,68,64)+sPath('M20 128h60','ac')+sCirc(30,104,6)+sLine(30,110,30,126)+sCirc(70,104,6)+sLine(70,110,70,126);},
+ function(){return sCirc(50,40,8,'ac')+sRays(50,40,11,15,8)+sMan(30,94,.9)+sMan(70,94,.9)+sPath('M44 90q6 6 12 0','ac')+sPath('M20 128c8-6 20-6 30 0c10-6 22-6 30 0');},
+ function(){return sPath('M24 60h52l-4 44H28Z')+sCirc(34,112,8)+sCirc(66,112,8)+sPath('M30 60q20-26 40 0','ac')+sStar(50,46,5,5,2.2)+sCirc(32,128,4)+sCirc(68,128,4)+sLine(50,60,50,104);},
+ function(){return '<g transform="translate(0 -2)">'+sPath('M30 38c0-10 14-10 20 0c6 10 20 10 20 0c0-10-14-10-20 0c-6 10-20 10-20 0Z','ac')+'</g>'+sCirc(50,60,6)+sPath('M44 56q6-8 12 0','ac')+sLine(50,66,50,84)+sPath('M50 72l-8 16M50 72l8 16')+sRays(50,106,15,21,12)+sCirc(50,106,13)+sCirc(45,103,1.6)+sCirc(55,103,1.6)+sPath('M47 110l3 3l3-3M43 112q7 6 14 0')+sLine(18,128,82,128);},
+ function(){return sPath('M20 128l26-60l26 60Z')+sCirc(66,56,2,'ac')+sLine(66,60,66,72)+sPath('M58 56h16v14h-16Z','ac')+sLine(66,72,66,78)+sCirc(62,100,0.1)+sLine(30,128,78,128)+sLine(32,50,32,128)+sCirc(32,44,4)+sPath('M62 86l4-8l4 8Z','ac');},
+ function(){return sCirc(50,78,32)+sCirc(50,78,10,'ac')+sRays(50,78,10,32,8)+sCirc(50,36,4)+sCirc(50,120,4)+sCirc(12,78,4)+sCirc(88,78,4);},
+ function(){return sLine(50,34,50,112)+sPath('M30 68h40')+sPath('M30 68l-6 18h12ZM70 68l-6 18h12Z','ac')+sCirc(50,34,5)+sLine(50,112,50,124)+sLine(36,124,64,124)+sPath('M44 40h12');},
+ function(){return sLine(18,36,82,36)+sLine(26,36,26,128)+sLine(74,36,74,128)+sLine(50,36,50,56)+sCirc(50,88,6,'ac')+sPath('M50 82L50 62M50 94L42 112M50 94L58 112')+sCirc(50,88,12);},
+ function(){return sCirc(50,50,11)+sCirc(46,48,2.2)+sCirc(54,48,2.2)+sPath('M49 54l1 3l1-3M44 58h12M47 58v3M50 58v3M53 58v3')+sPath('M50 63v34M38 70q12 6 24 0M38 79q12 6 24 0M38 88q12 6 24 0','')+sPath('M76 32v96M76 32q-26-4-34 16','ac')+sLine(14,128,86,128)+sPath('M14 128a12 12 0 0 1 24 0','ac')+sPath('M11.9 122.9L6.3 120.8M17.4 115.7L14.0 110.8M26.0 113.0L26.0 107.0M34.6 115.7L38.0 110.8M40.1 122.9L45.7 120.8');},
+ function(){return sPath('M26 62h20v26a10 10 0 0 1-20 0Z')+sPath('M54 82h20v26a10 10 0 0 1-20 0Z')+sPath('M46 74q10 4 10 14q-2 -2 0 0','ac')+sPath('M46 68q14 8 12 28','ac')+sPath('M22 52q-14-14-8-28M78 52q14-14 8-28','ac');},
+ function(){return sStar(50,86,24,5,9.5)+sCirc(50,86,24)+sPath('M34 40q6-10 16-4q10-6 16 4')+sLine(50,28,50,34)+sPath('M30 120h40M26 128h48');},
+ function(){return sRect(36,48,28,76)+sPath('M34 48h32l-4-12H38ZM36 36v-6h6v6M46 36v-6h8v6M58 36v-6h6v6')+sRect(46,98,8,26)+sPath('M72 30l-10 20l12 4l-12 24','ac')+sCirc(24,86,2)+sCirc(20,104,2)+sCirc(80,100,2)+sCirc(84,84,2);},
+ function(){return sStar(50,56,22,8,9,'')+sCirc(24,32,3)+sCirc(76,34,3)+sCirc(20,60,3)+sCirc(80,62,3)+sPath('M16 108c10-6 20-6 34 0c14 6 24 6 34 0M16 120c10-6 20-6 34 0c14 6 24 6 34 0','ac');},
+ function(){return sPath('M60 30a24 24 0 1 0 0 48a18 22 0 1 1 0 -48Z','ac')+sRect(14,94,16,26)+sRect(70,94,16,26)+sPath('M44 124q-10-14 6-20q16-6 6-20')+sCirc(42,120,2)+sCirc(58,112,2);},
+ function(){return sCirc(50,64,18,'ac')+sRays(50,64,22,34,12)+sPath('M16 128V108M30 128V100M44 128V110M56 128V102M70 128V108M84 128V100')+sCirc(16,104,4)+sCirc(30,96,4)+sCirc(44,106,4)+sCirc(56,98,4)+sCirc(70,104,4)+sCirc(84,96,4);},
+ function(){return sPath('M24 52l32-14l-4 22Z','ac')+sPath('M14 100q10-8 18 0q8-8 18 0q8-8 18 0q8-8 18 0')+sMan(50,86,.7,'up')+sLine(36,128,36,114)+sLine(64,128,64,114)+sPath('M30 128h40')+sLine(76,40,86,34)+sLine(78,52,90,52);},
+ function(){return sPath('M50 28c-24 0-32 24-32 46s8 46 32 46s32-24 32-46s-8-46-32-46Z')+sPath('M50 44l6 12l13 2l-9 9l2 13l-12-6l-12 6l2-13l-9-9l13-2Z','ac')+sCirc(22,34,3)+sCirc(78,34,3)+sCirc(22,118,3)+sCirc(78,118,3);}
+];
+function pipSym(su){ // 原点中心の小さな記号(幅約16×高さ約22)
+  if(su===0)return sLine(0,-11,0,11)+sPath('M0-4q-8-2-8-9q8 0 8 9Zm0 6q8-2 8-9q-8 0-8 9Z');
+  if(su===1)return sPath('M-8-6h16q0 12-8 14q-8-2-8-14Z')+sLine(0,8,0,12)+sLine(-5,12,5,12);
+  if(su===2)return sPath('M0-12L-2.6-8V5H2.6V-8Z')+sLine(-6,5,6,5)+sLine(0,5,0,12);
+  return sCirc(0,0,9)+sStar(0,0,7,5,2.8);
+}
+const PIPS={
+ 1:[[50,78]],2:[[50,48],[50,108]],3:[[50,44],[50,78],[50,112]],
+ 4:[[32,52],[68,52],[32,104],[68,104]],5:[[32,52],[68,52],[50,78],[32,104],[68,104]],
+ 6:[[32,48],[68,48],[32,78],[68,78],[32,108],[68,108]],
+ 7:[[32,48],[68,48],[50,63],[32,78],[68,78],[32,108],[68,108]],
+ 8:[[32,48],[68,48],[50,63],[32,78],[68,78],[50,93],[32,108],[68,108]],
+ 9:[[32,44],[68,44],[32,66],[68,66],[50,78],[32,90],[68,90],[32,112],[68,112]],
+ 10:[[32,44],[68,44],[50,56],[32,66],[68,66],[32,90],[68,90],[50,100],[32,112],[68,112]]
+};
+function suitDeco(su){
+  if(su===0)return sPath('M14 134h72')+sPath('M26 134q-2-7 4-8M50 134q-2-7 4-8M72 134q-2-7 4-8');
+  if(su===1)return sPath('M14 132q9-6 18 0t18 0t18 0t18 0');
+  if(su===2)return '<g transform="translate(6 -2) scale(.55)" stroke-width="3.4">'+sPath('M18 33q-4-6 2-8q2-5 8-3q5-3 9 2q6 0 5 6Z')+'</g>';
+  return sPath('M14 134h72')+sCirc(26,131,2.2)+sCirc(50,131,2.2)+sCirc(74,131,2.2);
+}
+function minorArt(su,r){
+  let s='';
+  if(r<10){
+    s+=suitDeco(su);
+    const sc=r===0?2.4:(r>=6?.78:1);
+    (PIPS[r+1]||[]).forEach(function(p){s+='<g transform="translate('+p[0]+' '+p[1]+') scale('+sc+')" stroke-width="'+(2/sc).toFixed(2)+'">'+pipSym(su)+'</g>';});
+    return s;
+  }
+  if(r===9)return minorArt(su,9);
+  // 宮廷カード: 上半身+冠+スートの記号
+  const k=r-10; // 0:ペイジ 1:ナイト 2:クイーン 3:キング
+  s+=sCirc(50,58,9)+sPath('M30 100q0-22 20-22q20 0 20 22Z');
+  if(k===0)s+=sPath('M40 52l10-16l10 16','ac');
+  if(k===1)s+=sPath('M40 56q0-14 10-14q10 0 10 14ZM50 42q10-8 18 0','ac');
+  if(k===2)s+=sPath('M40 50l-3-14l8 8l5-10l5 10l8-8l-3 14Z','ac');
+  if(k===3)s+=sPath('M39 50l-4-18l10 10l5-12l5 12l10-10l-4 18Z','ac')+sLine(76,60,76,104);
+  s+='<g transform="translate(50 120) scale(1.3)" stroke-width="1.6">'+pipSym(su)+'</g>';
+  return s;
+}
+function cardSvg(idx){
+  const art=cardArt(idx);
+  let body;
+  if(idx<22)body=MAJOR_ART[idx]();
+  else{const m=idx-22;body=minorArt(Math.floor(m/14),m%14);}
+  return SVGNS_OPEN+sRect(3,3,94,144,'fr')+sRect(8,8,84,134,'fr2')+
+    '<text x="50" y="23" text-anchor="middle" class="tn" stroke="none" fill="currentColor">'+esc(art.num)+'</text>'+body+'</svg>';
+}
+
+const TAROT_T=0.8;
+function tarotSeat(cards){
+  const W=[1,0.75,1];
+  let tot=0;
+  const out=cards.map(function(c,i){
+    const t=TAROT[c.idx];
+    const st=c.rev?t[6]:t[3];
+    tot+=VAL[st]*W[i];
+    return {idx:c.idx,rev:c.rev,pos:POS[i],st:st,kw:c.rev?t[4]:t[1],tx:c.rev?t[5]:t[2]};
+  });
+  const stance=tot>=TAROT_T?'y':(tot<=-TAROT_T?'n':'h');
+  const tail={y:'全体として動く案に前向きな並びです。',n:'全体として慎重さを求める並びです。',h:'追い風と向かい風が混ざる並びです。'}[stance];
+  const reason='現状は「'+out[0].kw+'」、障害は「'+out[1].kw+'」、助言は「'+out[2].kw+'」の方向です。'+tail;
+  return {stance:stance,cards:out,reason:reason};
+}
+
+/* ===== 天文計算(低精度の暦。見立ての基準には十分な数分角〜0.5度程度) ===== */
+function julianDay(y,m,d,hUT){
+  if(m<=2){y-=1;m+=12;}
+  const A=Math.floor(y/100), B=2-A+Math.floor(A/4);
+  return Math.floor(365.25*(y+4716))+Math.floor(30.6001*(m+1))+d+B-1524.5+hUT/24;
+}
+function jdOfDate(dt){
+  return julianDay(dt.getUTCFullYear(),dt.getUTCMonth()+1,dt.getUTCDate(),dt.getUTCHours()+dt.getUTCMinutes()/60);
+}
+const EL={
+  sun:{N:[0,0],i:[0,0],w:[282.9404,4.70935e-5],a:[1,0],e:[0.016709,-1.151e-9],M:[356.0470,0.9856002585]},
+  moon:{N:[125.1228,-0.0529538083],i:[5.1454,0],w:[318.0634,0.1643573223],a:[60.2666,0],e:[0.054900,0],M:[115.3654,13.0649929509]},
+  mercury:{N:[48.3313,3.24587e-5],i:[7.0047,5.00e-8],w:[29.1241,1.01444e-5],a:[0.387098,0],e:[0.205635,5.59e-10],M:[168.6562,4.0923344368]},
+  venus:{N:[76.6799,2.46590e-5],i:[3.3946,2.75e-8],w:[54.8910,1.38374e-5],a:[0.723330,0],e:[0.006773,-1.302e-9],M:[48.0052,1.6021302244]},
+  mars:{N:[49.5574,2.11081e-5],i:[1.8497,-1.78e-8],w:[286.5016,2.92961e-5],a:[1.523688,0],e:[0.093405,2.516e-9],M:[18.6021,0.5240207766]},
+  jupiter:{N:[100.4542,2.76854e-5],i:[1.3030,-1.557e-7],w:[273.8777,1.64505e-5],a:[5.20256,0],e:[0.048498,4.469e-9],M:[19.8950,0.0830853001]},
+  saturn:{N:[113.6634,2.38980e-5],i:[2.4886,-1.081e-7],w:[339.3939,2.97661e-5],a:[9.55475,0],e:[0.055546,-9.499e-9],M:[316.9670,0.0334442282]},
+  uranus:{N:[74.0005,1.3978e-5],i:[0.7733,1.9e-8],w:[96.6612,3.0565e-5],a:[19.18171,-1.55e-8],e:[0.047318,7.45e-9],M:[142.5905,0.011725806]},
+  neptune:{N:[131.7806,3.0173e-5],i:[1.7700,-2.55e-7],w:[272.8461,-6.027e-6],a:[30.05826,3.313e-8],e:[0.008606,2.15e-9],M:[260.2471,0.005995147]}
+};
+function el(p,k,d){return p[k][0]+p[k][1]*d;}
+function kepler(M,e){
+  let E=M+e/D2R*sind(M)*(1+e*cosd(M));
+  for(let n=0;n<12;n++){
+    const E1=E-(E-e/D2R*sind(E)-M)/(1-e*cosd(E));
+    const diff=Math.abs(E1-E);
+    E=E1;
+    if(diff<1e-5)break;
+  }
+  return E;
+}
+function orbit(name,d){
+  const p=EL[name];
+  const w=el(p,'w',d), a=el(p,'a',d), e=el(p,'e',d), M=rev(el(p,'M',d));
+  const E=kepler(M,e);
+  const xv=a*(cosd(E)-e), yv=a*Math.sqrt(1-e*e)*sind(E);
+  return {N:el(p,'N',d),i:el(p,'i',d),w:w,a:a,e:e,M:M,v:atan2d(yv,xv),r:Math.sqrt(xv*xv+yv*yv)};
+}
+function sunPos(d){
+  const o=orbit('sun',d);
+  const lon=rev(o.v+o.w);
+  return {lon:lon,x:o.r*cosd(lon),y:o.r*sind(lon)};
+}
+function sunLonJD(jd){return sunPos(jd-2451543.5).lon;}
+function planetGeo(name,d,sun){
+  const o=orbit(name,d);
+  const u=o.v+o.w;
+  let xh=o.r*(cosd(o.N)*cosd(u)-sind(o.N)*sind(u)*cosd(o.i));
+  let yh=o.r*(sind(o.N)*cosd(u)+cosd(o.N)*sind(u)*cosd(o.i));
+  let zh=o.r*(sind(u)*sind(o.i));
+  if(name==='jupiter'||name==='saturn'||name==='uranus'){
+    const Mj=rev(el(EL.jupiter,'M',d)), Ms=rev(el(EL.saturn,'M',d)), Mu=rev(el(EL.uranus,'M',d));
+    let lon=atan2d(yh,xh), lat=atan2d(zh,Math.sqrt(xh*xh+yh*yh));
+    if(name==='jupiter'){
+      lon+=-0.332*sind(2*Mj-5*Ms-67.6)-0.056*sind(2*Mj-2*Ms+21)+0.042*sind(3*Mj-5*Ms+21)-0.036*sind(Mj-2*Ms)+0.022*cosd(Mj-Ms)+0.023*sind(2*Mj-3*Ms+52)-0.016*sind(Mj-5*Ms-69);
+    }else if(name==='saturn'){
+      lon+=0.812*sind(2*Mj-5*Ms-67.6)-0.229*cosd(2*Mj-4*Ms-2)+0.119*sind(Mj-2*Ms-3)+0.046*sind(2*Mj-6*Ms-69)+0.014*sind(Mj-3*Ms+32);
+      lat+=-0.020*cosd(2*Mj-4*Ms-2)+0.018*sind(2*Mj-6*Ms-49);
+    }else{
+      lon+=0.040*sind(Ms-2*Mu+6)+0.035*sind(Ms-3*Mu+33)-0.015*sind(Mj-Mu+20);
+    }
+    xh=o.r*cosd(lon)*cosd(lat); yh=o.r*sind(lon)*cosd(lat); zh=o.r*sind(lat);
+  }
+  return rev(atan2d(yh+sun.y,xh+sun.x));
+}
+function moonLon(d){
+  const o=orbit('moon',d);
+  const u=o.v+o.w;
+  const xh=o.r*(cosd(o.N)*cosd(u)-sind(o.N)*sind(u)*cosd(o.i));
+  const yh=o.r*(sind(o.N)*cosd(u)+cosd(o.N)*sind(u)*cosd(o.i));
+  let lon=atan2d(yh,xh);
+  const s=orbit('sun',d);
+  const Ms=s.M, Mm=o.M;
+  const Ls=Ms+s.w, Lm=Mm+o.w+o.N, D=Lm-Ls, F=Lm-o.N;
+  lon+=-1.274*sind(Mm-2*D)+0.658*sind(2*D)-0.186*sind(Ms)-0.059*sind(2*Mm-2*D)-0.057*sind(Mm-2*D+Ms)+0.053*sind(Mm+2*D)+0.046*sind(2*D-Ms)+0.041*sind(Mm-Ms)-0.035*sind(D)-0.031*sind(Mm+Ms)-0.015*sind(2*F-2*D)+0.011*sind(Mm-4*D);
+  return rev(lon);
+}
+function bodiesAt(jd){
+  const d=jd-2451543.5, s=sunPos(d);
+  return {sun:s.lon,moon:moonLon(d),mercury:planetGeo('mercury',d,s),venus:planetGeo('venus',d,s),mars:planetGeo('mars',d,s)};
+}
+function ascendant(jd,lat,lonE){
+  const T=jd-2451545.0, d=jd-2451543.5;
+  const theta=rev(280.46061837+360.98564736629*T+lonE);
+  const eps=23.4393-3.563e-7*d;
+  return rev(atan2d(cosd(theta),-(sind(theta)*cosd(eps)+Math.tan(lat*D2R)*sind(eps))));
+}
+function plutoGeo(d,sun){
+  const S=50.03+0.033459652*d, P=238.95+0.003968789*d;
+  const lon=238.9508+0.00400703*d-19.799*sind(P)+19.848*cosd(P)+0.897*sind(2*P)-4.956*cosd(2*P)+0.610*sind(3*P)+1.211*cosd(3*P)-0.341*sind(4*P)-0.190*cosd(4*P)+0.128*sind(5*P)-0.034*cosd(5*P)-0.038*sind(6*P)+0.031*cosd(6*P)+0.020*sind(S-P)-0.010*cosd(S-P);
+  const lat=-3.9082-5.453*sind(P)-14.975*cosd(P)+3.527*sind(2*P)+1.673*cosd(2*P)-1.051*sind(3*P)+0.328*cosd(3*P)+0.179*sind(4*P)-0.292*cosd(4*P)+0.019*sind(5*P)+0.100*cosd(5*P)-0.031*sind(6*P)-0.026*cosd(6*P)+0.011*cosd(S-P);
+  const r=40.72+6.68*sind(P)+6.90*cosd(P)-1.18*sind(2*P)-0.03*cosd(2*P)+0.15*sind(3*P)-0.14*cosd(3*P);
+  const xh=r*cosd(lon)*cosd(lat), yh=r*sind(lon)*cosd(lat);
+  return rev(atan2d(yh+sun.y,xh+sun.x));
+}
+function houseCusps(jd,lat,lonE){
+  const T=jd-2451545.0, d=jd-2451543.5;
+  const th=rev(280.46061837+360.98564736629*T+lonE);
+  const eps=23.4393-3.563e-7*d;
+  const asc=rev(atan2d(cosd(th),-(sind(th)*cosd(eps)+Math.tan(lat*D2R)*sind(eps))));
+  const mc=rev(atan2d(sind(th),cosd(th)*cosd(eps)));
+  if(Math.abs(lat)>=66){
+    const s0=Math.floor(asc/30)*30;
+    return {asc:asc,mc:mc,system:'whole',cusps:[0,1,2,3,4,5,6,7,8,9,10,11].map(function(i){return rev(s0+30*i);})};
+  }
+  const ecl=function(R){return rev(atan2d(sind(R),cosd(R)*cosd(eps)));};
+  const sa=function(l){
+    const dec=Math.asin(sind(eps)*sind(l))/D2R;
+    const x=-Math.tan(lat*D2R)*Math.tan(dec*D2R);
+    return Math.acos(Math.max(-1,Math.min(1,x)))/D2R;
+  };
+  const inter=function(R0,f){
+    let R=R0;
+    for(let i=0;i<20;i++){R=f(ecl(R));}
+    return ecl(R);
+  };
+  const c11=inter(th+30,function(l){return th+sa(l)/3;});
+  const c12=inter(th+60,function(l){return th+2*sa(l)/3;});
+  const c3=inter(th+150,function(l){return th+180-(180-sa(l))/3;});
+  const c2=inter(th+120,function(l){return th+180-2*(180-sa(l))/3;});
+  return {asc:asc,mc:mc,system:'placidus',cusps:[asc,c2,c3,rev(mc+180),rev(c11+180),rev(c12+180),rev(asc+180),rev(c2+180),rev(c3+180),mc,c11,c12]};
+}
+const THEMES={
+  general:{name:'全般',h:[]},
+  work:{name:'仕事・キャリア',h:[10,6]},
+  money:{name:'お金・資産',h:[2,8]},
+  home:{name:'住まい・家族',h:[4]},
+  love:{name:'恋愛・結婚・パートナー',h:[5,7]},
+  learn:{name:'学び・挑戦・旅',h:[9,3]},
+  life:{name:'生活習慣・日課',h:[6]}
+};
+function themeOf(c){return Object.prototype.hasOwnProperty.call(THEMES,c)?THEMES[c]:THEMES.general;}
+const HOUSE_NAME=['','自分・始まり','お金・価値観','学び・身近な交流','住まい・家族','恋愛・創造','仕事の日課・生活習慣','パートナー','共有資産・変容','挑戦・海外・学問','仕事・社会的地位','仲間・目標','休息・内面'];
+const SIGNS=['牡羊座','牡牛座','双子座','蟹座','獅子座','乙女座','天秤座','蠍座','射手座','山羊座','水瓶座','魚座'];
+const GLYPH=['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓'].map(function(g){return g+'\uFE0E';});
+function signLabel(lon){const i=Math.floor(lon/30);return GLYPH[i]+SIGNS[i]+Math.floor(lon%30)+'°';}
+
+/* ===== 四柱推命 ===== */
+const STEMS='甲乙丙丁戊己庚辛壬癸'.split('');
+const BRANCHES='子丑寅卯辰巳午未申酉戌亥'.split('');
+const HID=[9,5,0,1,4,2,3,5,6,7,4,8];
+// 蔵干(本気・中気・余気の順)と、月律分野蔵干表による節入り後の日数配分
+const HID3=[[9,8],[5,7,9],[0,2,4],[1,0],[4,9,1],[2,6,4],[3,5,2],[5,1,3],[6,8,4],[7,6],[4,3,7],[8,0,4]];
+const HDAY=[[20,10],[18,3,9],[16,7,7],[20,10],[18,3,9],[16,9,5],[11,9,10],[18,3,9],[17,3,10],[20,10],[18,3,9],[18,5,7]];
+const SUPPORT=['比肩','劫財','偏印','正印'];
+const DST=[[1948,5,2,9,11],[1949,4,3,9,10],[1950,5,7,9,9],[1951,5,6,9,8]];
+const ELEM=['木','火','土','金','水'];
+const GOD_TXT={
+  '比肩':'自立と対等な競争の星','劫財':'競争と出費、人間関係の摩擦が出やすい星','食神':'楽しみと表現、ゆとりの星','傷官':'才能の発揮と変革、反発の星',
+  '偏財':'流動的な金運と人脈の星','正財':'堅実な収入と管理の星','偏官':'試練と行動力、プレッシャーの星','正官':'責任と信用、役職の星',
+  '偏印':'独自の発想と学び、孤立の星','正印':'援助と学び、安定の星'
+};
+const STR_LABEL={strong:'身強(日主が強い)',weak:'身弱(日主が弱い)',mid:'中和(日主が中庸)'};
+const STR_SHORT={strong:'身強',weak:'身弱',mid:'中和'};
+function dayIdx(y,m,d){
+  const jdn=Math.floor(julianDay(y,m,d,0)+0.5);
+  return (((jdn+49)%60)+60)%60;
+}
+function godOf(a,b){
+  const ea=a>>1, eb=b>>1, same=(a%2)===(b%2);
+  if(ea===eb)return same?'比肩':'劫財';
+  if(eb===(ea+1)%5)return same?'食神':'傷官';
+  if(eb===(ea+2)%5)return same?'偏財':'正財';
+  if(ea===(eb+2)%5)return same?'偏官':'正官';
+  return same?'偏印':'正印';
+}
+function godScore(strength,god){
+  if(strength==='strong')return ['食神','傷官','偏財','正財','偏官','正官'].indexOf(god)>=0?0.8:-1.2;
+  if(strength==='weak')return SUPPORT.indexOf(god)>=0?1.2:-0.8;
+  if(['食神','正財','正官','正印'].indexOf(god)>=0)return 1;
+  if(['劫財','傷官','偏官','偏印'].indexOf(god)>=0)return -1;
+  return 0;
+}
+function ymFrom(lon,y,m){
+  const mi=Math.floor(rev(lon-315)/30);
+  const ly=(m<=2&&lon<315)?y-1:y;
+  const yi=(((ly-4)%60)+60)%60, ys=yi%10, yb=yi%12;
+  return {ly:ly,mi:mi,ys:ys,yb:yb,ms:((ys%5)*2+2+mi)%10,mb:(2+mi)%12};
+}
+function pstr(p){return p?STEMS[p[0]]+BRANCHES[p[1]]:'—';}
+function eotMin(y,m,d){
+  const n=Math.floor((Date.UTC(y,m-1,d)-Date.UTC(y,0,0))/86400000);
+  const B=(360/365)*(n-81);
+  return 9.87*sind(2*B)-7.53*cosd(B)-1.5*sind(B);
+}
+function inDST(y,m,d){
+  const v=m*100+d;
+  for(let i=0;i<DST.length;i++){
+    const r=DST[i];
+    if(r[0]===y&&v>=r[1]*100+r[2]&&v<=r[3]*100+r[4])return true;
+  }
+  return false;
+}
+function calcProfile(st){
+  const b=st.birth.split('-').map(Number);
+  let hour=null;
+  if(st.time){const t=st.time.split(':').map(Number);hour=t[0]+t[1]/60;}
+  const pl=st.place;
+  return {y:b[0],m:b[1],d:b[2],hour:hour,tz:pl?pl.tz:9,lat:pl?pl.lat:null,lon:pl?pl.lon:null,sex:st.sex||'',hm:st.hm==='std'?'std':'solar',jp:!pl||pl.label!=='その他'};
+}
+function solveSun(target,jd){
+  let t=jd;
+  for(let i=0;i<8;i++){
+    const l=sunLonJD(t);
+    t+=(((target-l+540)%360)-180)/0.9856;
+  }
+  return t;
+}
+function ageText(years){
+  let y=Math.floor(years), m=Math.round((years-y)*12);
+  if(m>=12){y+=1;m=0;}
+  return y+'歳'+(m?m+'か月':'');
+}
+function ryoIndex(b,days){
+  const dd=HDAY[b];
+  let acc=0;
+  for(let i=dd.length-1;i>=0;i--){
+    acc+=dd[i];
+    if(days<acc)return i;
+  }
+  return 0;
+}
+
+function buildNatal(p){
+  const notes=[];
+  let y=p.y, m=p.m, d=p.d;
+  const hasTime=p.hour!=null;
+  let hour=hasTime?p.hour:12;
+  if(hasTime&&p.jp&&p.tz===9&&inDST(y,m,d)){
+    hour-=1;
+    if(hour<0){
+      hour+=24;
+      const t=new Date(Date.UTC(y,m-1,d-1));
+      y=t.getUTCFullYear();m=t.getUTCMonth()+1;d=t.getUTCDate();
+    }
+    notes.push('この日は日本に夏時間があったため、出生時間から1時間引いて標準時にしています。すでに標準時で入力した場合は、この補正がずれになります。');
+  }
+  const jd=julianDay(y,m,d,hour-p.tz);
+  const lon0=sunLonJD(jd);
+  const ym=ymFrom(lon0,y,m);
+  const a0=ymFrom(sunLonJD(julianDay(y,m,d,0-p.tz)),y,m);
+  const a1=ymFrom(sunLonJD(julianDay(y,m,d,24-p.tz)),y,m);
+  if(!hasTime&&a0.mi!==a1.mi)notes.push('生まれた日は節入り日です。出生時間がないため、月柱(または年柱)が実際と違う可能性があります。');
+  // 日柱・時柱に使う時刻(真太陽時にするか標準時のままか)
+  let sy=y, smo=m, sd=d, sh=hour, offMin=0;
+  const solarMode=hasTime&&p.hm!=='std'&&p.lat!=null;
+  if(hasTime&&p.hm!=='std'&&p.lat==null)notes.push('出生地がないため、時柱は標準時のまま計算しています。');
+  if(solarMode){
+    offMin=(p.lon-p.tz*15)*4+eotMin(y,m,d);
+    const t=hour+offMin/60, shift=Math.floor(t/24);
+    sh=t-24*shift;
+    if(shift!==0){
+      const dt=new Date(Date.UTC(y,m-1,d+shift));
+      sy=dt.getUTCFullYear();smo=dt.getUTCMonth()+1;sd=dt.getUTCDate();
+      notes.push('真太陽時では日付が'+(shift<0?'前日':'翌日')+'になるため、日柱は'+(shift<0?'前日':'翌日')+'として計算しています。');
+    }
+  }
+  const di=dayIdx(sy,smo,sd), ds=di%10, db=di%12;
+  let hp=null;
+  if(hasTime){
+    const hb=Math.floor(((sh+1)%24)/2);
+    hp=[((ds%5)*2+hb)%10,hb];
+    const x=(sh+1)%2, dist=Math.min(x,2-x)*60;
+    if(dist<=(solarMode?10:30))notes.push('出生時間が時柱の境目に近いため、時柱が変わる可能性があります。');
+    if(solarMode){
+      notes.push('時柱は真太陽時(標準時'+(offMin>=0?'+':'−')+Math.abs(Math.round(offMin))+'分)で計算しています。');
+      const cds=dayIdx(y,m,d)%10, sb=Math.floor(((hour+1)%24)/2);
+      if(sb!==hb||(shiftDayDiffers(sy,smo,sd,y,m,d)))notes.push('標準時のままなら時柱は'+STEMS[((cds%5)*2+sb)%10]+BRANCHES[sb]+'です。流派によってはこちらを使います。');
+    }
+  }else{
+    notes.push('出生時間がないため、時柱は使っていません。');
+  }
+  const pil={y:[ym.ys,ym.yb],m:[ym.ms,ym.mb],d:[ds,db],h:hp};
+
+  // 日主の強さ: 蔵干(本気・中気・余気)と位置の重み、月は司令を加味
+  const daysIn=jd-solveSun(rev(315+ym.mi*30),jd);
+  const ri=ryoIndex(ym.mb,daysIn);
+  const ryoStem=HID3[ym.mb][ri];
+  const parts=[[pil.y[0],1],[pil.m[0],1.5]];
+  if(hp)parts.push([hp[0],1]);
+  function addBranch(b,tot,ryo){
+    HID3[b].forEach(function(st,i){
+      parts.push([st,HDAY[b][i]/30*tot+(ryo===i?1:0)]);
+    });
+  }
+  addBranch(pil.y[1],1,-1);
+  addBranch(ym.mb,2,ri);
+  addBranch(db,1.5,-1);
+  if(hp)addBranch(hp[1],1,-1);
+  let sup=0,tot=0;
+  const el=[0,0,0,0,0];
+  parts.forEach(function(pt){
+    tot+=pt[1];
+    el[pt[0]>>1]+=pt[1];
+    if(SUPPORT.indexOf(godOf(ds,pt[0]))>=0)sup+=pt[1];
+  });
+  el[ds>>1]+=1.5;
+  const esum=el.reduce(function(a,b){return a+b;},0);
+  const ratio=sup/tot;
+  const strength=ratio>=0.5?'strong':(ratio<=0.34?'weak':'mid');
+  const ryo='生まれ月は'+BRANCHES[ym.mb]+'月の'+(Math.floor(daysIn)+1)+'日目で、司令は'+STEMS[ryoStem]+'('+godOf(ds,ryoStem)+')です。';
+
+  let luck=null;
+  if(p.sex==='m'||p.sex==='f'){
+    const fwd=((p.sex==='m')===(ym.ys%2===0));
+    const k=Math.floor(rev(lon0-315)/30);
+    const target=rev(315+(fwd?(k+1):k)*30);
+    const days=Math.abs(solveSun(target,jd)-jd);
+    const startYears=days/3;
+    let m60=0;
+    for(let n=0;n<60;n++){if(n%10===ym.ms&&n%12===ym.mb){m60=n;break;}}
+    const list=[];
+    for(let i=1;i<=9;i++){
+      const idx=(((m60+(fwd?i:-i))%60)+60)%60;
+      list.push({s:idx%10,b:idx%12,from:startYears+10*(i-1)});
+    }
+    luck={fwd:fwd,startYears:startYears,list:list};
+    if(!hasTime)notes.push('出生時間がないため、大運の始まりの年齢は数か月ずれることがあります。');
+  }
+
+  const lons=bodiesAt(jd);
+  const hasPlace=p.lat!=null;
+  let asc=null, mc=null, houses;
+  const snotes=[];
+  if(hasTime&&hasPlace){
+    const hc=houseCusps(jd,p.lat,p.lon);
+    asc=hc.asc;mc=hc.mc;houses={cusps:hc.cusps,system:hc.system};
+    if(hc.system==='whole')snotes.push('出生地が高緯度のため、ハウスはホールサイン方式です。');
+  }else{
+    const s0=Math.floor(lons.sun/30)*30;
+    houses={cusps:[0,1,2,3,4,5,6,7,8,9,10,11].map(function(i){return rev(s0+30*i);}),system:'solar'};
+    if(!hasTime)snotes.push('出生時間がないため、月・上昇点・MCは使っていません。ハウスは太陽星座を第1ハウスとする方式で見ています。');
+    else snotes.push('出生地がないため、上昇点とMCは使っていません。日本時間で計算し、ハウスは太陽星座を第1ハウスとする方式で見ています。');
+  }
+  function edge(nm,lon,tol){
+    const d=lon%30;
+    if(d<tol||d>30-tol)snotes.push(nm+'は'+SIGNS[Math.floor(lon/30)]+'の'+d.toFixed(1)+'°で、星座の境目に近い位置です。計算の誤差や出生時間のずれで、'+(d<tol?'ひとつ前':'ひとつ後')+'の星座になる可能性があります。');
+  }
+  edge('太陽',lons.sun,hasTime?0.2:1.1);
+  if(hasTime){edge('月',lons.moon,1.5);if(asc!=null)edge('上昇点',asc,1.5);}
+  return {pil:pil,dm:ds,strength:strength,ratio:ratio,ryo:ryo,elems:el.map(function(x){return x/esum;}),notes:notes,snotes:snotes,lons:lons,asc:asc,mc:mc,houses:houses,hasTime:hasTime,jd:jd,luck:luck};
+}
+function shiftDayDiffers(sy,smo,sd,y,m,d){return sy!==y||smo!==m||sd!==d;}
+
+function shiAt(nat,dt){
+  const jdn=jdOfDate(dt);
+  const lon=sunLonJD(jdn);
+  const ym=ymFrom(lon,dt.getFullYear(),dt.getMonth()+1);
+  const dm=nat.dm;
+  const gods=[godOf(dm,ym.ys),godOf(dm,HID[ym.yb]),godOf(dm,ym.ms),godOf(dm,HID[ym.mb])];
+  let score=gods.reduce(function(a,g){return a+godScore(nat.strength,g);},0);
+  let cur=-1, lg=null;
+  if(nat.luck){
+    const age=(jdn-nat.jd)/365.2425;
+    nat.luck.list.forEach(function(x,i){if(age>=x.from)cur=i;});
+    if(cur>=0){
+      const x=nat.luck.list[cur];
+      lg=[godOf(dm,x.s),godOf(dm,HID[x.b])];
+      score+=godScore(nat.strength,lg[0])+godScore(nat.strength,lg[1]);
+    }
+  }
+  const thr=0.55*Math.sqrt(lg?6:4);
+  return {stance:score>=thr?'y':(score<=-thr?'n':'h'),score:score,yp:STEMS[ym.ys]+BRANCHES[ym.yb],mp:STEMS[ym.ms]+BRANCHES[ym.mb],gods:gods,ly:ym.ly,cur:cur,lg:lg};
+}
+function shiSeat(nat,dt){
+  const r=shiAt(nat,dt);
+  const dmEl=ELEM[nat.dm>>1]+'の'+(nat.dm%2===0?'陽':'陰');
+  const tail={y:'動く案には追い風の巡りです。',n:'動く案には向かい風の巡りです。',h:'追い風と向かい風が混ざる巡りです。'}[r.stance];
+  let lk='';
+  let luckOut;
+  if(nat.luck){
+    if(r.cur>=0){
+      const x=nat.luck.list[r.cur];
+      lk='現在の大運は'+STEMS[x.s]+BRANCHES[x.b]+'('+Math.floor(x.from)+'歳から)、大運干は'+r.lg[0]+'('+GOD_TXT[r.lg[0]]+')。';
+    }else{
+      lk='まだ大運が始まる前です('+ageText(nat.luck.startYears)+'から)。';
+    }
+    luckOut={dir:nat.luck.fwd?'順行':'逆行',start:ageText(nat.luck.startYears),cur:r.cur,list:nat.luck.list.slice(0,8).map(function(x){return {p:STEMS[x.s]+BRANCHES[x.b],a:Math.floor(x.from)};})};
+  }
+  const reason='日主は'+STEMS[nat.dm]+'('+dmEl+')、命式は'+STR_LABEL[nat.strength]+'です。'+r.ly+'年の流年は'+r.yp+'、流年干は'+r.gods[0]+'('+GOD_TXT[r.gods[0]]+')。今月の流月は'+r.mp+'、流月干は'+r.gods[2]+'('+GOD_TXT[r.gods[2]]+')。'+lk+tail;
+  const out={stance:r.stance,reason:reason,pillars:[pstr(nat.pil.y),pstr(nat.pil.m),pstr(nat.pil.d),pstr(nat.pil.h)],dm:STEMS[nat.dm],notes:nat.notes,ratio:nat.ratio,strLabel:STR_SHORT[nat.strength],ryo:nat.ryo,elems:nat.elems};
+  if(luckOut)out.luck=luckOut;
+  return out;
+}
+
+/* ===== 西洋占星術(トランジット) ===== */
+const PL_JP={sun:'太陽',moon:'月',mercury:'水星',venus:'金星',mars:'火星',jupiter:'木星',saturn:'土星',uranus:'天王星',neptune:'海王星',pluto:'冥王星',asc:'上昇点',mc:'MC(天頂)'};
+const ASPECTS=[{a:0,n:'コンジャンクション',c:'conj'},{a:60,n:'セクスタイル',c:'soft'},{a:90,n:'スクエア',c:'hard'},{a:120,n:'トライン',c:'soft'},{a:180,n:'オポジション',c:'hard'}];
+const TP=['jupiter','saturn','uranus','neptune','pluto'];
+function aspBase(pn,A){
+  if(pn==='jupiter')return A.c==='hard'?0.5:(A.a===60?1:2);
+  if(pn==='saturn')return A.c==='soft'?0.5:-1.5;
+  if(pn==='uranus')return A.c==='hard'?0:0.5;
+  if(pn==='pluto')return A.c==='soft'?0.5:-0.75;
+  return A.c==='soft'?0:-0.75;
+}
+function aspMean(pn,A){
+  const g=A.c==='hard'?'hard':(A.c==='soft'?'soft':'conj');
+  if(pn==='jupiter')return g==='hard'?'広げすぎ・見込みの甘さに注意が要る配置です。':'拡大と好機が重なる配置です。';
+  if(pn==='saturn')return g==='soft'?'安定と継続を支える配置です。':'制約と責任が重くなる配置です。慎重さが求められます。';
+  if(pn==='uranus')return g==='hard'?'予定外の揺れが出やすい配置です。':'変化と新しい展開を後押しする配置です。';
+  if(pn==='pluto')return g==='soft'?'根本から変える動きを後押しする配置です。':'大きな圧力と、避けにくい変容を伴う配置です。';
+  return g==='soft'?'直感が働きやすい配置です。':'見通しが曇りやすく、思い込みに注意が要る配置です。';
+}
+const HOUSE_BASE={jupiter:1,saturn:-0.5,uranus:0,neptune:-0.25,pluto:-0.25};
+const HOUSE_MEAN={jupiter:'拡大と好機が向かう分野です。',saturn:'責任と制約が集まる分野です。',uranus:'変化が起きやすい分野です。',neptune:'見通しが曇りやすい分野です。',pluto:'根本的な変容が起きやすい分野です。'};
+const HSYS={placidus:'プラシーダス',whole:'ホールサイン(高緯度のため)',solar:'ソーラーサイン(出生時間か出生地がないための代替)'};
+function houseOf(l,cusps){
+  for(let i=0;i<12;i++){
+    const a=cusps[i], b=cusps[(i+1)%12];
+    if(rev(l-a)<rev(b-a))return i+1;
+  }
+  return 1;
+}
+function starAt(nat,dt,cat){
+  const d=jdOfDate(dt)-2451543.5, sun=sunPos(d);
+  const tp={};
+  TP.forEach(function(n){tp[n]=n==='pluto'?plutoGeo(d,sun):planetGeo(n,d,sun);});
+  const m1=planetGeo('mercury',d+0.25,sunPos(d+0.25)), m0=planetGeo('mercury',d-0.25,sunPos(d-0.25));
+  const retro=(((m1-m0+540)%360)-180)<0;
+  const targets=[['sun',nat.lons.sun,1],['mercury',nat.lons.mercury,1],['venus',nat.lons.venus,0.5],['mars',nat.lons.mars,0.5]];
+  if(nat.hasTime)targets.push(['moon',nat.lons.moon,1]);
+  if(nat.asc!=null){targets.push(['asc',nat.asc,1]);targets.push(['mc',nat.mc,1]);}
+  const found=[];
+  let total=retro?-0.5:0;
+  TP.forEach(function(pn){
+    targets.forEach(function(t){
+      const diff=rev(tp[pn]-t[1]), sep=diff>180?360-diff:diff;
+      ASPECTS.forEach(function(A){
+        const orb=Math.abs(sep-A.a);
+        if(orb<=3){
+          const sc=aspBase(pn,A)*t[2]*(1-0.6*orb/3);
+          total+=sc;
+          found.push({pn:pn,t:t[0],A:A,orb:orb,score:sc});
+        }
+      });
+    });
+  });
+  found.sort(function(a,b){return Math.abs(b.score)-Math.abs(a.score)||a.orb-b.orb;});
+  const th=themeOf(cat);
+  const hits=[];
+  if(th.h.length){
+    TP.forEach(function(pn){
+      const h=houseOf(tp[pn],nat.houses.cusps);
+      if(th.h.indexOf(h)>=0){
+        total+=HOUSE_BASE[pn];
+        hits.push({pn:pn,h:h});
+      }
+    });
+  }
+  return {stance:total>=1?'y':(total<=-1?'n':'h'),score:total,retro:retro,found:found,hits:hits};
+}
+function starSeat(nat,dt,cat){
+  const r=starAt(nat,dt,cat);
+  const aspects=r.found.slice(0,3).map(function(f){
+    return {t:PL_JP[f.pn]+'が出生の'+PL_JP[f.t]+'に'+f.A.n+'(オーブ'+f.orb.toFixed(1)+'°)',m:aspMean(f.pn,f.A)};
+  });
+  const houses=r.hits.map(function(h){
+    return {t:PL_JP[h.pn]+'が第'+h.h+'ハウス('+HOUSE_NAME[h.h]+')を通過中',m:HOUSE_MEAN[h.pn]};
+  });
+  const tail={y:'動く案には追い風の配置です。',n:'慎重さが求められる配置です。',h:'決め手に欠ける配置です。'}[r.stance];
+  const parts=[];
+  if(!aspects.length)parts.push('いま、出生図の主要な点に大きなトランジットは当たっていません。');
+  if(cat&&cat!=='general'&&!houses.length)parts.push('選んだ分野('+themeOf(cat).name+')のハウスに、主要な外惑星は入っていません。');
+  if(r.retro)parts.push('水星が逆行中で、契約や判断のやり直しが起きやすい時期です。');
+  parts.push(tail);
+  const chart=['太陽 '+signLabel(nat.lons.sun),nat.hasTime?'月 '+signLabel(nat.lons.moon):'月 (出生時間不明のため不使用)',nat.asc!=null?'上昇 '+signLabel(nat.asc)+' / MC '+signLabel(nat.mc):'上昇・MC (出生時間と出生地が必要)','ハウス '+HSYS[nat.houses.system]];
+  return {stance:r.stance,reason:parts.join(''),chart:chart,aspects:aspects,houses:houses,retro:r.retro,notes:nat.snotes};
+}
+
+/* ===== 月の帯(時期を見る3席の重ね合わせ) ===== */
+function monthStrip(profile,birthStr,now,deadline,cat){
+  const p=birthStr.split('-').map(Number), bm=p[1], bd=p[2];
+  const nat=buildNatal(profile);
+  const dl=deadline?new Date(deadline+'T00:00:00'):null;
+  const out=[];
+  for(let i=0;i<12;i++){
+    const first=new Date(now.getFullYear(),now.getMonth()+i,1);
+    const y=first.getFullYear(), mo=first.getMonth()+1;
+    const dt=i===0?now:new Date(y,mo-1,15,12);
+    const py=personalYear(bm,bd,y), pm=personalMonth(py,mo);
+    const st={shi:shiAt(nat,dt).stance,star:starAt(nat,dt,cat).stance,num:PY[pm].s};
+    const v=[st.shi,st.star,st.num];
+    const ys=v.filter(function(x){return x==='y';}).length, ns=v.filter(function(x){return x==='n';}).length;
+    const tone=(ys>=2&&ns===0)?'y':((ns>=2&&ys===0)?'n':'h');
+    out.push({y:y,mo:mo,st:st,tone:tone,after:dl?first>dl:false,dl:dl?(dl.getFullYear()===y&&dl.getMonth()+1===mo):false,now:i===0});
+  }
+  return out;
+}
+
+/* ===== 投票・論点整理 ===== */
+function verdict(votes){
+  const sw=votes.reduce(function(a,v){return a+v.w;},0);
+  const s=votes.reduce(function(a,v){return a+VAL[v.stance]*v.w;},0)/sw;
+  const cnt={y:0,n:0,h:0};
+  votes.forEach(function(v){cnt[v.stance]++;});
+  const same=new Set(votes.map(function(v){return v.stance;})).size===1;
+  const full=votes.length>=4;
+  if(same&&s>0)return {s:s,key:'go',label:full?'4席そろって動く方向':'動く方向で一致',tone:'y'};
+  if(same&&s<0)return {s:s,key:'stay',label:full?'4席そろって見送る方向':'見送る方向で一致',tone:'n'};
+  if(same)return {s:s,key:'wait',label:full?'4席そろって様子見':'様子見で一致',tone:'h'};
+  if(s>=0.3)return {s:s,key:'lean_go',label:'やや動く寄り'+(cnt.n?'(反対'+cnt.n+'席)':''),tone:'y'};
+  if(s<=-0.3)return {s:s,key:'lean_stay',label:'やや見送り寄り'+(cnt.y?'(賛成'+cnt.y+'席)':''),tone:'n'};
+  if(cnt.y&&cnt.n)return {s:s,key:'split',label:'意見が割れた',tone:'h'};
+  return {s:s,key:'wait',label:'様子見が優勢',tone:'h'};
+}
+
+const CONCERN={
+  y:{shi:'長い目で見た巡り(四柱推命)は、動く案に追い風です。',star:'いまの星の配置(西洋占星術)は、タイミングとして追い風です。',num:'今年のテーマ(数秘術)は、動く側を向いています。',tarot:'現状の見立て(タロット)は、前向きな状態を示しています。'},
+  n:{shi:'長い目で見た巡り(四柱推命)は、動く案に向かい風です。',star:'いまの星の配置(西洋占星術)は、慎重さを求めています。',num:'今年のテーマ(数秘術)は、動くより整える側です。',tarot:'現状の見立て(タロット)は、条件や進め方への引っかかりを示しています。'}
+};
+function pointsFor(v){
+  const present=SEATS.filter(function(s){return v[s.k];});
+  const by={y:[],n:[],h:[]};
+  present.forEach(function(s){by[v[s.k]].push(s);});
+  const names=function(a){return a.map(function(s){return s.name;}).join('・');};
+  const out=[];
+  if(by.y.length===present.length){
+    out.push('全席が動く方向です。意見の割れ目はないので、残る論点は「動いた場合に失うものを許容できるか」です。最悪の場合を書き出して、受け入れられるか確かめてください。');
+    return out;
+  }
+  if(by.n.length===present.length){
+    out.push('全席が見送り寄りです。見送る前提で考え、動く案に戻る条件を決めておいてください。');
+    return out;
+  }
+  if(by.h.length===present.length){
+    out.push('全席が様子見です。決める材料が足りていない状態と読めます。期限までに集める情報を決め、判断を保留する理由をはっきりさせてください。');
+    return out;
+  }
+  const parts=[];
+  if(by.y.length)parts.push('賛成: '+names(by.y));
+  if(by.h.length)parts.push('保留: '+names(by.h));
+  if(by.n.length)parts.push('反対: '+names(by.n));
+  out.push('席の意見が分かれています。'+parts.join(' / ')+'。');
+  const lines=[];
+  by.y.forEach(function(s){lines.push(CONCERN.y[s.k]);});
+  by.n.forEach(function(s){lines.push(CONCERN.n[s.k]);});
+  if(lines.length)out.push(lines.join(''));
+  const time=['shi','star','num'].filter(function(k){return v[k];});
+  const tY=time.filter(function(k){return v[k]==='y';}).length, tN=time.filter(function(k){return v[k]==='n';}).length;
+  const t=v.tarot;
+  if(t==='n'&&tY>=2)out.push('時期を見る席の多くは追い風ですが、タロットは今の進め方や条件への引っかかりを示しています。時期は合っていても、条件に問題が残っているかもしれません。条件の見直しを先に行ってください。');
+  else if(t==='y'&&tN>=2)out.push('タロットは前向きですが、時期を見る席の多くは向かい風です。意欲に対して、タイミングか土台が追いついていない可能性があります。動く前に基盤を確認してください。');
+  else if(t==='h'&&tY>=2)out.push('時期は追い風ですが、現状の見立ては様子見です。情報か準備が足りない可能性があります。足りない情報を1つ特定してから動く形が合います。');
+  else if(t==='y'&&time.length&&tY===0&&tN===0)out.push('現状は前向きで、時期は慎重な側です。大きく動くより、小さく試す形が合います。');
+  return out;
+}
+
+const NEXT={
+  go:['動く案を最小の形で試せないか考えます(お試し期間、兼務、相談だけ先に行うなど)。','最悪の場合の損失を書き出し、許容範囲か確認します。','期限の前に実行日を1つ決めて、このログに残します。'],
+  lean_go:['動く案の中で、いちばん不確かな点を1つ選んで確認します。','確認が取れたら、小さく始めます。','1〜2週間後に見直す日を決めます。'],
+  split:['割れた理由(上の論点整理)を、自分の言葉で書き直します。','その論点を確かめる質問を1つ作り、期限前に答えを得ます。','答えが出るまで、取り返しのつかない動きは避けます。'],
+  wait:['判断に足りない情報を3つまで書き出します。','誰がいつまでに集めるかを決めます。','期限が来たら、集めた情報を持ってもう一度この会議にかけます。'],
+  lean_stay:['見送る前提で、動かない案を続ける条件を整えます。','動く案に戻るきっかけを1つ決めておきます。','下の月の帯で追い風の月を選び、その時期に見直します。'],
+  stay:['動かない案のデメリットを書き出し、見送りで納得できるか確認します。','見送る場合の再検討日を決めます。','再検討日をこのログに残します。']
+};
+
+function seatStats(logs){
+  const r={};
+  KEYS.forEach(function(k){r[k]={n:0,hit:0};});
+  for(const l of logs){
+    const o=l.outcome;
+    if(!o||o.result==='unknown')continue;
+    const right=((o.action==='moved')===(o.result==='good'))?'y':'n';
+    for(const k of KEYS){
+      const v=l.votes[k];
+      if(!v||v.stance==='h')continue;
+      r[k].n++;
+      if(v.stance===right)r[k].hit++;
+    }
+  }
+  return r;
+}
+function weightOf(s){return s.n>=5?0.8+0.4*s.hit/s.n:1;}
+/*LOGIC_END*/
+
+/* ---------- 保存 ---------- */
+const KEY='shiseki-kaigi-v1';
+const PLACES=[['北海道',43.06,141.35],['青森',40.82,140.74],['岩手',39.70,141.15],['宮城',38.27,140.87],['秋田',39.72,140.10],['山形',38.24,140.36],['福島',37.75,140.47],['茨城',36.34,140.45],['栃木',36.57,139.88],['群馬',36.39,139.06],['埼玉',35.86,139.65],['千葉',35.61,140.12],['東京',35.69,139.69],['神奈川',35.45,139.64],['新潟',37.90,139.02],['富山',36.70,137.21],['石川',36.59,136.63],['福井',36.07,136.22],['山梨',35.66,138.57],['長野',36.65,138.18],['岐阜',35.39,136.72],['静岡',34.98,138.38],['愛知',35.18,136.91],['三重',34.73,136.51],['滋賀',35.00,135.87],['京都',35.02,135.76],['大阪',34.69,135.50],['兵庫',34.69,135.18],['奈良',34.69,135.83],['和歌山',34.23,135.17],['鳥取',35.50,134.24],['島根',35.47,133.05],['岡山',34.66,133.93],['広島',34.40,132.46],['山口',34.19,131.47],['徳島',34.07,134.56],['香川',34.34,134.04],['愛媛',33.84,132.77],['高知',33.56,133.53],['福岡',33.61,130.42],['佐賀',33.25,130.30],['長崎',32.74,129.87],['熊本',32.79,130.74],['大分',33.24,131.61],['宮崎',31.91,131.42],['鹿児島',31.56,130.56],['沖縄',26.21,127.68]];
+let storageOK=true;
+function cleanPlace(p){
+  if(p&&typeof p==='object'&&typeof p.lat==='number'&&typeof p.lon==='number'&&typeof p.tz==='number'&&p.lat>=-90&&p.lat<=90&&p.lon>=-180&&p.lon<=180&&p.tz>=-12&&p.tz<=14){
+    return {label:String(p.label||'その他').slice(0,20),lat:p.lat,lon:p.lon,tz:p.tz};
+  }
+  return null;
+}
+function load(){
+  try{
+    const raw=localStorage.getItem(KEY);
+    if(raw){
+      const o=JSON.parse(raw);
+      if(o&&Array.isArray(o.logs)){
+        return {birth:typeof o.birth==='string'?o.birth:'',time:(typeof o.time==='string'&&/^\d{2}:\d{2}$/.test(o.time))?o.time:'',place:cleanPlace(o.place),sex:(o.sex==='m'||o.sex==='f')?o.sex:'',hm:o.hm==='std'?'std':'solar',logs:o.logs};
+      }
+    }
+  }catch(e){storageOK=false;}
+  return {birth:'',time:'',place:null,sex:'',hm:'solar',logs:[]};
+}
+let state=load();
+function save(){
+  try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){storageOK=false;}
+}
+try{localStorage.setItem(KEY+'-t','1');localStorage.removeItem(KEY+'-t');}catch(e){storageOK=false;}
+
+/* ---------- 補助 ---------- */
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function todayStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function fmt(iso){return new Date(iso).toLocaleDateString('ja-JP',{year:'numeric',month:'numeric',day:'numeric'});}
+function fmtDay(s){return new Date(s+'T00:00:00').toLocaleDateString('ja-JP',{year:'numeric',month:'numeric',day:'numeric'});}
+function validBirth(s){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(s))return false;
+  const p=s.split('-').map(Number);
+  const d=new Date(p[0],p[1]-1,p[2]);
+  return d.getFullYear()===p[0]&&d.getMonth()===p[1]-1&&d.getDate()===p[2]&&p[0]>=1900&&s<=todayStr();
+}
+function drawCards(){
+  const picked=[], a=new Uint32Array(1), c=(window.crypto||window.msCrypto);
+  const rnd=function(n){
+    const lim=Math.floor(4294967296/n)*n;
+    let x;
+    do{c.getRandomValues(a);x=a[0];}while(x>=lim);
+    return x%n;
+  };
+  while(picked.length<3){
+    const idx=rnd(78);
+    if(!picked.some(function(p){return p.idx===idx;}))picked.push({idx:idx,rev:rnd(2)===1});
+  }
+  return picked;
+}
+function newId(){return Date.now().toString(36)+Math.floor(Math.random()*1296).toString(36);}
+
+/* ---------- 出生情報の入力欄 ---------- */
+function profileFields(s,p){
+  let sel='';
+  if(p.place){
+    const i=PLACES.findIndex(function(x){return x[0]===p.place.label;});
+    sel=i>=0?String(i):'other';
+  }
+  const opts='<option value="">指定しない</option>'+PLACES.map(function(x,i){return '<option value="'+i+'"'+(sel===String(i)?' selected':'')+'>'+x[0]+'</option>';}).join('')+'<option value="other"'+(sel==='other'?' selected':'')+'>海外・その他(緯度経度を入力)</option>';
+  const pl=p.place||{};
+  return '<div class="field"><label for="birth'+s+'">生年月日</label><input id="birth'+s+'" type="date" required max="'+todayStr()+'" value="'+esc(p.birth||'')+'" autocomplete="off"></div>'+
+  '<div class="row2"><div class="field"><label for="btime'+s+'">出生時間(任意)</label><input id="btime'+s+'" type="time" value="'+esc(p.time||'')+'"></div>'+
+  '<div class="field"><label for="bplace'+s+'">出生地(任意)</label><select id="bplace'+s+'">'+opts+'</select></div></div>'+
+  '<div class="row2"><div class="field"><label for="bsex'+s+'">性別(任意)</label><select id="bsex'+s+'"><option value="">答えない</option><option value="m"'+(p.sex==='m'?' selected':'')+'>男性</option><option value="f"'+(p.sex==='f'?' selected':'')+'>女性</option></select></div>'+
+  '<div class="field"><label for="bhm'+s+'">時柱の時刻</label><select id="bhm'+s+'"><option value="solar"'+(p.hm==='std'?'':' selected')+'>真太陽時(出生地の経度と均時差で補正)</option><option value="std"'+(p.hm==='std'?' selected':'')+'>標準時のまま</option></select></div></div>'+
+  '<div id="pother'+s+'" class="row2"'+(sel==='other'?'':' hidden')+'>'+
+  '<div class="field"><label for="plat'+s+'">緯度(北が+)</label><input id="plat'+s+'" type="number" step="any" value="'+(sel==='other'?esc(pl.lat):'')+'"></div>'+
+  '<div class="field"><label for="plon'+s+'">経度(東が+)</label><input id="plon'+s+'" type="number" step="any" value="'+(sel==='other'?esc(pl.lon):'')+'"></div>'+
+  '<div class="field"><label for="ptz'+s+'">UTCとの時差(日本は9)</label><input id="ptz'+s+'" type="number" step="any" value="'+(sel==='other'?esc(pl.tz):'9')+'"></div></div>'+
+  '<p class="hint">出生時間・出生地・性別は空欄でも使えます。時間を入れると四柱推命の時柱と西洋占星術の月が、出生地も入れると上昇点・MC・ハウスが加わります。性別は、四柱推命の大運が進む向きを決める伝統的な規則(男女の2通り)にだけ使います。答えない場合は大運を使いません。時柱の時刻は、出生地があるときだけ真太陽時にできます。出生地を空欄にすると日本時間・標準時で計算します。名前は聞きません。入力した内容はこの端末のブラウザにだけ保存され、外部には送信されません。</p>';
+}
+function parseProfile(s){
+  const g=function(id){const e=document.getElementById(id+s);return e?e.value.trim():'';};
+  const birth=g('birth');
+  if(!validBirth(birth))return {err:'生年月日を正しく入力してください(1900年以降、今日まで)。'};
+  const time=g('btime');
+  if(time&&!/^\d{2}:\d{2}$/.test(time))return {err:'出生時間を正しく入力してください。'};
+  let place=null;
+  const pv=g('bplace');
+  if(pv==='other'){
+    const lat=parseFloat(g('plat')), lon=parseFloat(g('plon')), tz=parseFloat(g('ptz'));
+    if(!(lat>=-90&&lat<=90)||!(lon>=-180&&lon<=180)||!(tz>=-12&&tz<=14))return {err:'緯度(-90〜90)、経度(-180〜180)、UTCとの時差(-12〜14)を入力してください。'};
+    place={label:'その他',lat:lat,lon:lon,tz:tz};
+  }else if(pv!==''&&PLACES[Number(pv)]){
+    const x=PLACES[Number(pv)];
+    place={label:x[0],lat:x[1],lon:x[2],tz:9};
+  }
+  const sx=g('bsex');
+  return {birth:birth,time:time,place:place,sex:(sx==='m'||sx==='f')?sx:'',hm:g('bhm')==='std'?'std':'solar'};
+}
+
+/* ---------- 画面 ---------- */
+const app=document.getElementById('app');
+const tabsEl=document.getElementById('tabs');
+let view={name:'consult',id:null};
+let msg=null;
+let editOutcome=false;
+let confirmDelete=false;
+
+function go(name,id){view={name:name,id:id||null};msg=null;editOutcome=false;confirmDelete=false;render();window.scrollTo(0,0);}
+
+function renderTabs(){
+  const items=[['consult','相談する'],['log','決定ログ'],['data','データ']];
+  const cur=view.name==='result'?'log':view.name;
+  tabsEl.innerHTML=items.map(function(t){
+    return '<button class="tab" type="button" data-act="tab" data-v="'+t[0]+'"'+(cur===t[0]?' aria-current="page"':'')+'>'+t[1]+(t[0]==='log'&&state.logs.length?'('+state.logs.length+')':'')+'</button>';
+  }).join('');
+}
+
+function msgHtml(){
+  let h='';
+  if(!storageOK)h+='<div class="msg err" role="status">この環境では保存できません。ページを閉じると記録が消えます。</div>';
+  if(msg)h+='<div class="msg '+(msg.kind||'')+'" role="status">'+esc(msg.text)+'</div>';
+  return h;
+}
+
+function dueLogs(){
+  const t=todayStr(), now=Date.now();
+  return state.logs.filter(function(l){
+    if(l.outcome)return false;
+    if(l.deadline)return l.deadline<=t;
+    return now-new Date(l.at).getTime()>=30*86400000;
+  }).sort(function(a,b){return a.at<b.at?-1:1;});
+}
+function dueBanner(){
+  const d=dueLogs();
+  if(!d.length)return '';
+  return '<section class="due" role="status"><p><b>結果を記録していない相談が'+d.length+'件あります。</b>期限を過ぎたもの、または1か月以上たったものです。結果を入れると、あなたに合う席が分かってきます。</p><button class="btn small" type="button" data-act="open" data-id="'+esc(d[0].id)+'">「'+esc(d[0].theme.length>14?d[0].theme.slice(0,14)+'…':d[0].theme)+'」を開く</button></section>';
+}
+function moonSvg(p){
+  const r=20,c=24,cv=Math.cos(2*Math.PI*p),rx=(r*Math.abs(cv)).toFixed(2);
+  const waxing=p<0.5;
+  const d='M'+c+' '+(c-r)+'A'+r+' '+r+' 0 0 1 '+c+' '+(c+r)+'A'+rx+' '+r+' 0 0 '+(cv>0?0:1)+' '+c+' '+(c-r)+'Z';
+  return '<svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><circle cx="24" cy="24" r="20" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".55"/><path d="'+d+'" fill="currentColor" stroke="none"'+(waxing?'':' transform="translate(48 0) scale(-1 1)"')+'/></svg>';
+}
+function skyHtml(){
+  const L=bodiesAt(jdOfDate(new Date()));
+  const el=rev(L.moon-L.sun), p=el/360;
+  const names=['新月','三日月','上弦の月','満ちていく月','満月','欠けていく月','下弦の月','有明の月'];
+  const name=names[Math.floor(((p+0.0625)%1)*8)];
+  const lore={'新月':'占星術では、始める・願いを立てるのに向くと言われます。','満月':'占星術では、物事が実り、区切りがつきやすいと言われます。'}[name]||'月は約2.5日ごとに星座を移ります。';
+  return '<div class="sky">'+moonSvg(p)+'<div><p><b>今夜の月: '+name+'</b>(月は'+GLYPH[Math.floor(L.moon/30)]+SIGNS[Math.floor(L.moon/30)]+'を進行中)</p><p class="hint">'+lore+'</p></div></div>';
+}
+function viewConsult(){
+  const needBirth=!state.birth;
+  return dueBanner()+'<section class="panel"><h2>今夜の問い</h2>'+skyHtml()+
+  '<p class="lead">迷っていることを1つ入力します。四柱推命・西洋占星術・数秘術・タロットの4席が、「動く案」に対して賛成・反対・保留で答えます。</p>'+
+  (!needBirth&&(!state.time||!state.place||!state.sex)?'<p class="hint">出生時間・出生地・性別を入れると、時柱・大運・月・上昇点・ハウスも使えます。<button class="btn ghost small" type="button" data-act="tab" data-v="data">データ画面で入力</button></p>':'')+
+  '<form id="f-consult" class="panel flat" novalidate>'+
+  (needBirth?profileFields('',{})+'<hr style="border:0;border-top:1px solid var(--line);width:100%;margin:0">':'')+
+  '<div class="field"><label for="theme">相談したいこと</label><input id="theme" name="theme" type="text" maxlength="60" required placeholder="例: 転職するか迷っている" autocomplete="off"></div>'+
+  '<div class="row2"><div class="field"><label for="cat">相談の分野(任意)</label><select id="cat" name="cat">'+Object.keys(THEMES).map(function(k){return '<option value="'+k+'">'+THEMES[k].name+'</option>';}).join('')+'</select><p class="hint">西洋占星術のハウス(どの生活分野に外惑星が来ているか)の読みに使います。</p></div></div>'+
+  '<div class="row2"><div class="field"><label for="optA">動く案</label><input id="optA" name="optA" type="text" maxlength="80" required placeholder="例: 内定先に移る" autocomplete="off"></div>'+
+  '<div class="field"><label for="optB">動かない案</label><input id="optB" name="optB" type="text" maxlength="80" placeholder="例: 今の会社に残る(空欄なら今のまま)" autocomplete="off"></div></div>'+
+  '<div class="row2"><div class="field"><label for="deadline">決める期限(任意)</label><input id="deadline" name="deadline" type="date" min="'+todayStr()+'"></div></div>'+
+  '<div class="field"><label for="note">迷っている理由(任意)</label><textarea id="note" name="note" maxlength="400" placeholder="例: 条件は上がるが、仕事内容に不安がある"></textarea><p class="hint">占いの計算には使われません。後で見返すためのメモです。</p></div>'+
+  '<div id="form-err" class="msg err" role="alert" hidden></div>'+
+  '<div class="btns"><button class="btn" type="submit">四席を招く</button><button class="btn ghost" type="button" data-act="example">例を入れる</button></div>'+
+  '</form></section>';
+}
+
+const SEAT_ICON={
+  shi:'<path d="M5 20V8M10 20V4M15 20V10M20 20V6" /><path d="M3 20h19"/>',
+  star:'<circle cx="12" cy="12" r="9"/><path d="M12 5l1.8 4.6l4.9.3l-3.8 3.1l1.2 4.8L12 15.2l-4.1 2.6l1.2-4.8L5.3 9.9l4.9-.3Z"/>',
+  num:'<circle cx="12" cy="12" r="9.5"/><path d="M12 5.5l6 10.5H6Z"/><circle cx="12" cy="12.5" r="1" fill="currentColor"/>',
+  tarot:'<rect x="6" y="2.5" width="12" height="19" rx="1.8"/><path d="M12 8l1.2 2.6l2.8.3l-2.1 1.9l.6 2.8L12 14.2l-2.5 1.4l.6-2.8L8 10.9l2.8-.3Z"/>'
+};
+function seatIcon(k){return '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">'+(SEAT_ICON[k]||'')+'</svg>';}
+function seatCard(meta,vote,extra){
+  const s=ST[vote.stance];
+  return '<article class="seat"><div class="seat-head"><div><h3>'+seatIcon(meta.k)+meta.name+'</h3><p class="role">'+meta.role+'</p></div><span class="mark '+vote.stance+'" role="img" aria-label="'+s.label+'">'+s.mark+'</span></div>'+
+  '<span class="pill '+vote.stance+'">'+s.label+'</span>'+extra+'</article>';
+}
+function pendingSeat(meta){
+  return '<article class="seat pending"><div class="seat-head"><div><h3>'+seatIcon(meta.k)+meta.name+'</h3><p class="role">'+meta.role+'</p></div><span class="mark p">不参加</span></div><p class="hint">この席が加わる前に行った相談のため、投票していません。</p></article>';
+}
+function notesHtml(a){
+  return (a&&a.length)?a.map(function(n){return '<p class="sub">'+esc(n)+'</p>';}).join(''):'';
+}
+
+function seatHtml(k,log){
+  const meta=SEATS.filter(function(s){return s.k===k;})[0];
+  const v=log.votes[k];
+  if(!v)return pendingSeat(meta);
+  if(k==='shi'){
+    const labels=['年','月','日','時'];
+    const cells=v.pillars.map(function(p,i){
+      const st=p==='—'?'—':esc(p.charAt(0));
+      const br=p==='—'?'':esc(p.charAt(1));
+      return '<div class="pillar'+(i===2?' me':'')+'"><small>'+labels[i]+'柱</small><b>'+st+'</b><b>'+br+'</b></div>';
+    }).join('');
+    let luckHtml='';
+    if(v.luck&&Array.isArray(v.luck.list)){
+      luckHtml='<p class="sub">大運('+esc(v.luck.dir)+'、'+esc(v.luck.start)+'から10年ごと)</p><div class="luckrow">'+v.luck.list.map(function(x,i){return '<div class="lk'+(i===v.luck.cur?' cur':'')+'"><small>'+esc(x.a)+'歳〜</small><b>'+esc(x.p)+'</b></div>';}).join('')+'</div>';
+    }
+    const EN=['木','火','土','金','水'];
+    let strHtml='', elemHtml='';
+    if(typeof v.ratio==='number')strHtml='<p class="sub">日主の強さ '+v.ratio.toFixed(2)+'('+esc(v.strLabel||'')+')。'+esc(v.ryo||'')+'</p>';
+    if(Array.isArray(v.elems)&&v.elems.length===5){
+      const el=v.elems.map(function(x){return Math.max(0,Number(x)||0);});
+      const mx=Math.max.apply(null,el)||1;
+      elemHtml='<div class="elem" role="img" aria-label="五行の配分: '+EN.map(function(e,i){return e+Math.round(el[i]*100)+'%';}).join(' ')+'">'+el.map(function(x,i){return '<div class="eb"><div class="bar"><i style="height:'+Math.round(x/mx*100)+'%"></i></div><span>'+EN[i]+'</span></div>';}).join('')+'</div>';
+    }
+    return seatCard(meta,v,'<div class="pillars" aria-label="命式">'+cells+'</div><p class="sub">太枠が日主('+esc(v.dm)+')です。</p>'+elemHtml+strHtml+luckHtml+'<p>'+esc(v.reason)+'</p>'+notesHtml(v.notes));
+  }
+  if(k==='star'){
+    const all=(v.aspects||[]).concat(v.houses||[]);
+    const asp=all.length?'<ul>'+all.map(function(a){return '<li>'+esc(a.t)+'。'+esc(a.m)+'</li>';}).join('')+'</ul>':'';
+    return seatCard(meta,v,'<div class="chart">'+v.chart.map(function(c){return '<span>'+esc(c)+'</span>';}).join('')+'</div>'+asp+'<p>'+esc(v.reason)+'</p>'+notesHtml(v.notes));
+  }
+  if(k==='num'){
+    return seatCard(meta,v,'<p>'+esc(v.reason)+'</p><p class="sub">ライフパス'+v.lp+'('+esc(LP[v.lp])+') / 今月は個人月'+v.pm+'</p>');
+  }
+  if(Array.isArray(v.cards)){
+    const rows=v.cards.map(function(c){
+      const art=cardArt(c.idx), t=TAROT[c.idx];
+      return '<div class="sp"><div class="tcard sm'+(c.rev?' rev':'')+'" aria-hidden="true">'+cardSvg(c.idx)+'</div><div class="cap"><small>'+esc(c.pos)+'</small><p><b>'+esc(t[0])+(c.rev?'(逆位置)':'(正位置)')+'</b></p><p class="sub">'+esc(c.kw)+'。'+esc(c.tx)+'</p></div></div>';
+    }).join('');
+    return seatCard(meta,v,'<div class="spread">'+rows+'</div><p>'+esc(v.reason)+'</p>');
+  }
+  const card=TAROT[v.idx];
+  return seatCard(meta,v,'<div class="tarot"><div class="tcard'+(v.rev?' rev':'')+'" aria-hidden="true">'+cardSvg(v.idx)+'</div><div><p><b>'+esc(card[0])+(v.rev?'(逆位置)':'(正位置)')+'</b></p><p class="sub">'+esc(v.kw)+'</p></div></div><p>'+esc(v.reason)+'</p>');
+}
+
+function stripHtml(log){
+  const cells=monthStrip(calcProfile(state),state.birth,new Date(log.at),log.deadline,log.cat||'general');
+  const good=cells.filter(function(c){return c.tone==='y'&&!c.after;});
+  let summary;
+  if(good.length)summary=(log.deadline?'期限までに':'今後12か月で')+'3席のうち2席以上が追い風の月: '+good.slice(0,4).map(function(c){return c.mo+'月';}).join('・');
+  else summary=log.deadline?'期限までの月に、時期を見る3席が追い風を示す月はありません。期限を延ばせるか確認する価値があります。':'今後12か月に、時期を見る3席が追い風を示す月はありません。';
+  const html=cells.map(function(c){
+    const s=ST[c.tone];
+    const mini=['shi','star','num'].map(function(k){return '<i class="'+c.st[k]+'">'+ST[c.st[k]].mark+'</i>';}).join('');
+    const lab=c.mo+'月 総合'+s.label+' 四柱推命'+ST[c.st.shi].label+' 西洋占星術'+ST[c.st.star].label+' 数秘術'+ST[c.st.num].label;
+    return '<div class="cell '+c.tone+(c.after?' after':'')+(c.now?' now':'')+(c.dl?' dl':'')+'" role="img" aria-label="'+lab+'"><span class="mo">'+c.mo+'月</span><span class="gl">'+s.mark+'</span><span class="mini">'+mini+'</span>'+(c.dl?'<span class="tag">期限</span>':(c.now?'<span class="tag">今月</span>':''))+'</div>';
+  }).join('');
+  return '<p>'+esc(summary)+'</p><div class="strip">'+html+'</div><p class="hint">大きい記号は総合です。賛成2席以上で反対なしなら○、反対2席以上で賛成なしなら×、それ以外は△にしています。下の小さい記号は左から四柱推命・西洋占星術・数秘術です。星の配置と流月は各月の15日(今月は会議の日)で見ています。枠線は期限の月、薄い月は期限後です。</p>';
+}
+
+function outcomeForm(log){
+  const o=log.outcome||{};
+  function r(name,val,label){return '<label><input type="radio" name="'+name+'" value="'+val+'" id="'+name+'-'+val+'"'+(o[name]===val?' checked':'')+' required> '+label+'</label>';}
+  return '<form id="f-outcome" data-id="'+esc(log.id)+'" class="panel flat" novalidate>'+
+  '<fieldset><legend>実際にどうしましたか</legend><div class="choices">'+r('action','moved','動いた')+r('action','stayed','動かなかった')+'</div></fieldset>'+
+  '<fieldset><legend>結果はどうでしたか</legend><div class="choices">'+r('result','good','良かった')+r('result','bad','悪かった')+r('result','unknown','まだ分からない')+'</div></fieldset>'+
+  '<fieldset><legend>この会議は判断の助けになりましたか</legend><div class="choices">'+r('helped','yes','助かった')+r('helped','same','変わらない')+r('helped','no','邪魔だった')+'</div></fieldset>'+
+  '<div id="o-err" class="msg err" role="alert" hidden></div>'+
+  '<div class="btns"><button class="btn" type="submit">記録する</button>'+(log.outcome?'<button class="btn ghost" type="button" data-act="cancel-outcome">やめる</button>':'')+'</div></form>';
+}
+
+function viewResult(log){
+  const v=log.verdict;
+  const present=SEATS.filter(function(s){return log.votes[s.k];});
+  const stances={};
+  present.forEach(function(s){stances[s.k]=log.votes[s.k].stance;});
+  const tally=['y','h','n'].map(function(k){return ST[k].label+' '+present.filter(function(s){return stances[s.k]===k;}).length;}).join('・');
+  const w=log.weights||{};
+  const adj=present.filter(function(s){return w[s.k]&&w[s.k]!==1;});
+  const wNote=adj.length?'<p class="hint">あなたの記録をもとに重みを調整しています('+adj.map(function(s){return s.name+' ×'+w[s.k].toFixed(2);}).join('、')+')。</p>':'';
+  const o=log.outcome;
+  let outcome;
+  if(o&&!editOutcome){
+    const A={moved:'動いた',stayed:'動かなかった'}, R={good:'良かった',bad:'悪かった',unknown:'まだ分からない'}, H={yes:'助かった',same:'変わらない',no:'邪魔だった'};
+    outcome='<div class="outcome-sum"><p>'+A[o.action]+' / 結果: '+R[o.result]+' / 会議は: '+H[o.helped]+'</p><p class="hint">'+fmt(o.at)+'に記録</p></div><div class="btns"><button class="btn ghost small" type="button" data-act="edit-outcome">記録を直す</button></div>';
+  }else if(o||editOutcome){
+    outcome=outcomeForm(log);
+  }else{
+    outcome='<p class="lead">実際に動いたか、結果がどうだったかを後から記録すると、どの席の視点が自分に合うかが分かってきます。</p>'+outcomeForm(log);
+  }
+  const points=pointsFor(stances).map(function(t){return '<p>'+esc(t)+'</p>';}).join('');
+  return '<section class="panel"><div class="topic"><p class="meta"><span>'+fmt(log.at)+'の会議</span>'+(log.deadline?'<span>期限 '+fmtDay(log.deadline)+'</span>':'')+(log.cat&&log.cat!=='general'?'<span>分野 '+esc(themeOf(log.cat).name)+'</span>':'')+'</p><p class="t">'+esc(log.theme)+'</p></div>'+
+  '<div class="opts"><div class="opt"><b>動く案</b>'+esc(log.optA)+'</div><div class="opt"><b>動かない案</b>'+esc(log.optB||'今のまま')+'</div></div>'+
+  (log.note?'<p class="hint">メモ: '+esc(log.note)+'</p>':'')+
+  '<div class="verdict"><span class="lb">四席の託宣</span><span class="big '+v.tone+'">'+esc(v.label)+'</span><p class="tally">'+tally+'(参加'+present.length+'席 / 全4席)。票は「動く案」に対する賛否です。</p><p class="hint">賛否の採点は、占いの流派の正解ではなく、この会議が決めた目安です。当たる保証はなく、判断材料のひとつとして使ってください。計算の考え方は下の「計算について」にあります。</p>'+wNote+'</div></section>'+
+  '<section class="seats" aria-label="席ごとの投票">'+KEYS.map(function(k){return seatHtml(k,log);}).join('')+'</section>'+
+  '<section class="panel"><h2>四席の声をまとめる</h2><div class="points">'+points+'</div></section>'+
+  '<section class="panel"><h2>動くのに向く月(巡りの帯)</h2>'+stripHtml(log)+'</section>'+
+  '<section class="panel"><h2>次の一手(星の助言)</h2><ol class="steps">'+NEXT[v.key].map(function(t){return '<li>'+esc(t)+'</li>';}).join('')+'</ol>'+
+  '<details><summary>計算について</summary><ul>'+
+  '<li>四柱推命は、年・月・日・時の柱を暦から計算します。日主の強さは、蔵干(本気・中気・余気)を位置ごとの重みで数え、生まれ月は節入りからの日数で司令を決めて判定します。調候や格局までは見ていません。流年・流月・大運の干支は、日主から見た十神で評価しています。</li>'+
+  '<li>時柱の時刻は、出生地があれば真太陽時(経度の差と均時差で補正)にできます。日付が変わるときは日柱も動かします。日本の1948〜1951年の夏時間は、日付で判定して自動で1時間引いています。</li>'+
+  '<li>大運は性別を入力したときだけ使います。男女どちらの規則で順行・逆行を決めるかを選ぶ項目で、起運年齢は前後の節入りまでの日数を3で割って出しています。</li>'+
+  '<li>西洋占星術は簡易な天体暦(数分角〜0.5度程度の誤差)で、木星から冥王星までが出生図に作る角度を許容度3度で見ています。水星の逆行も加味しています。ハウスは出生時間と出生地があればプラシーダス、なければ太陽星座を第1ハウスとする方式で、相談の分野のハウスに外惑星が入っていると票に加わります。</li>'+
+  '<li>タロットは大アルカナ22枚と小アルカナ56枚の78枚から、現状・障害・助言の3枚を引きます。障害の札は重みを少し下げて、3枚の合計で賛否を決めています。</li>'+
+  '<li>どの席も、賛成・反対・保留の基準はこの会議が決めた目安です。流派や占い師によって読みは変わります。</li>'+
+  '</ul></details></section>'+
+  '<section class="panel"><h2>答え合わせ(結果の記録)</h2>'+outcome+'</section>'+
+  '<div class="btns"><button class="btn ghost" type="button" data-act="tab" data-v="consult">新しい相談</button><button class="btn ghost" type="button" data-act="tab" data-v="log">決定ログへ</button></div>';
+}
+
+function viewLog(){
+  const logs=state.logs.slice().sort(function(a,b){return a.at<b.at?1:-1;});
+  if(!logs.length){
+    return '<section class="panel"><div class="empty"><p>まだ相談はありません。最初の相談を入力すると、ここに決定ログが残ります。</p><button class="btn" type="button" data-act="tab" data-v="consult">相談する</button></div></section>';
+  }
+  const st=seatStats(state.logs);
+  const rec=state.logs.filter(function(l){return l.outcome;});
+  const H={yes:0,same:0,no:0};
+  rec.forEach(function(l){H[l.outcome.helped]++;});
+  const seatStat=SEATS.map(function(m){
+    const s=st[m.k];
+    const body=s.n>=5?'方向が合った回数 '+s.hit+' / '+s.n+'('+Math.round(100*s.hit/s.n)+'%)':'結果つきの記録があと '+(5-s.n)+' 件で表示されます';
+    return '<div class="stat"><b>'+m.name+'との相性</b><span>'+body+'</span></div>';
+  }).join('');
+  const dueIds={};dueLogs().forEach(function(l){dueIds[l.id]=1;});
+  const rows=logs.map(function(l){
+    return '<button class="logrow" type="button" data-act="open" data-id="'+esc(l.id)+'"><span class="tt">'+esc(l.theme)+'</span><span class="vd">'+esc(l.verdict.label)+'</span><span class="dt">'+fmt(l.at)+(l.deadline?' / 期限 '+fmtDay(l.deadline):'')+'</span><span class="st">'+(l.outcome?'結果を記録済み':(dueIds[l.id]?'結果を記録する時期です':'結果は未記録'))+'</span></button>';
+  }).join('');
+  return dueBanner()+'<section class="panel"><h2>決定ログ</h2><div class="stats">'+
+  '<div class="stat"><b>相談の数</b><span>'+state.logs.length+' 件(結果の記録 '+rec.length+' 件)</span></div>'+
+  '<div class="stat"><b>会議は判断の助けになったか</b><span>助かった '+H.yes+' / 変わらない '+H.same+' / 邪魔だった '+H.no+'</span></div>'+
+  seatStat+'</div>'+
+  '<p class="hint">相性は「その席が賛成か反対を出したとき、実際の結果の方向と合っていたか」の割合です。5件未満では偶然の影響が大きいので、票の重みは均等のままにします。</p>'+
+  '<div class="list">'+rows+'</div></section>';
+}
+
+function viewData(){
+  const exp=JSON.stringify(state);
+  return '<section class="panel"><h2>データ</h2>'+
+  '<p class="lead">入力した内容は、このブラウザの保存領域にだけあります。このページは外部のサーバーに何も送らず、フォントも端末のものを使っています。ブラウザのデータを消すと、記録も消えます。別の端末には引き継がれません。</p></section>'+
+  '<section class="panel"><h3>出生情報</h3><form id="f-profile" class="panel flat" novalidate>'+profileFields('2',state)+
+  '<div id="p-err" class="msg err" role="alert" hidden></div><div class="btns"><button class="btn small" type="submit">保存</button></div></form>'+
+  '<p class="hint">出生時間・出生地・性別を空欄(性別は「答えない」)にして保存すると、その情報は消えます。変更は、これから開く会議と、結果画面の月の帯に反映されます。過去の席の投票は変わりません。</p></section>'+
+  '<section class="panel"><h3>個人情報の扱い</h3><ul class="hint plain"><li>生年月日・出生時間・出生地・性別・相談の中身は、この端末のブラウザにだけ保存されます。外部には送信されません。</li><li>家族や会社などの共有端末、共有アカウントのブラウザでは使わないでください。</li><li>出生地は、都道府県(または経緯度)で入力する形で、番地などの住所は聞きません。</li><li>相談のメモには、実名・住所・口座番号など、第三者を特定できる情報を書かないほうが安全です。</li><li>書き出した内容にも個人情報が含まれます。貼り付けて保管したメモなどは、自分で管理し、不要になったら消してください。</li></ul></section>'+
+  '<section class="panel"><h3>書き出しと復元</h3><p class="hint">別の端末に移すときや、バックアップを取るときに使います。この内容には生年月日と相談の中身が含まれるので、保管場所に気をつけてください。</p>'+
+  '<div class="field"><label for="export">書き出し</label><textarea id="export" class="code" readonly>'+esc(exp)+'</textarea></div>'+
+  '<div class="btns"><button class="btn ghost small" type="button" data-act="copy">コピー</button></div>'+
+  '<div class="field"><label for="import">復元(書き出した内容を貼り付け)</label><textarea id="import" class="code" placeholder="ここに貼り付け"></textarea></div>'+
+  '<div class="btns"><button class="btn ghost small" type="button" data-act="import">復元する(今のデータは置き換わります)</button></div></section>'+
+  '<section class="panel"><h3>すべて削除</h3><p class="hint">出生情報と決定ログをこの端末から消します。元に戻せません。</p>'+
+  (confirmDelete?'<div class="btns"><button class="btn danger small" type="button" data-act="delete-yes">本当に削除する</button><button class="btn ghost small" type="button" data-act="delete-no">やめる</button></div>':'<div class="btns"><button class="btn danger ghost small" type="button" data-act="delete-ask">すべて削除</button></div>')+'</section>';
+}
+
+function render(){
+  renderTabs();
+  let body;
+  if(view.name==='result'){
+    const log=state.logs.find(function(l){return l.id===view.id;});
+    body=log?viewResult(log):viewLog();
+  }else if(view.name==='log')body=viewLog();
+  else if(view.name==='data')body=viewData();
+  else body=viewConsult();
+  app.innerHTML=msgHtml()+body;
+}
+
+/* ---------- 操作 ---------- */
+let ritualOn=false;
+function ritual(done){
+  if(ritualOn)return;
+  ritualOn=true;
+  const calm=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const star='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2 5.6l5.9.3l-4.6 3.7l1.6 5.7L12 15l-4.9 3.3l1.6-5.7L4.1 8.9l5.9-.3Z"/></svg>';
+  const el=document.createElement('div');
+  el.className='ritual';el.setAttribute('role','status');
+  el.innerHTML='<div class="rcards" aria-hidden="true"><div class="rc">'+star+'</div><div class="rc">'+star+'</div><div class="rc">'+star+'</div></div><p>カードを切っています…</p><p class="hint">星を読んでいます。タップで先へ進みます。</p>';
+  document.body.appendChild(el);
+  let finished=false,timer=null;
+  function fin(){
+    if(finished)return;finished=true;
+    clearTimeout(timer);document.removeEventListener('keydown',onKey);
+    if(el.parentNode)el.parentNode.removeChild(el);
+    ritualOn=false;done();
+  }
+  function onKey(e){if(e.key==='Escape'||e.key==='Enter'||e.key===' ')fin();}
+  el.addEventListener('click',fin);
+  document.addEventListener('keydown',onKey);
+  timer=setTimeout(fin,calm?500:1900);
+}
+function showErr(id,text){const e=document.getElementById(id);if(e){e.textContent=text;e.hidden=false;}}
+
+document.addEventListener('change',function(e){
+  const t=e.target;
+  if(t&&t.id&&t.id.indexOf('bplace')===0){
+    const box=document.getElementById('pother'+t.id.slice(6));
+    if(box)box.hidden=(t.value!=='other');
+  }
+});
+
+document.addEventListener('click',function(e){
+  const t=e.target.closest('[data-act]');
+  if(!t)return;
+  const act=t.getAttribute('data-act');
+  if(act==='tab')go(t.getAttribute('data-v'));
+  else if(act==='open')go('result',t.getAttribute('data-id'));
+  else if(act==='example'){
+    const set=function(id,v){const el=document.getElementById(id);if(el)el.value=v;};
+    set('theme','転職するか迷っている');set('optA','内定先に移る');set('optB','今の会社に残る');
+    set('note','条件は上がるが、仕事内容に不安がある');
+  }
+  else if(act==='edit-outcome'){editOutcome=true;render();}
+  else if(act==='cancel-outcome'){editOutcome=false;render();}
+  else if(act==='copy'){
+    const ta=document.getElementById('export');
+    const fallback=function(){ta.focus();ta.select();};
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(ta.value).then(function(){msg={kind:'ok',text:'コピーしました。'};render();}).catch(function(){fallback();});
+    }else fallback();
+  }
+  else if(act==='import'){
+    const txt=document.getElementById('import').value.trim();
+    try{
+      const o=JSON.parse(txt);
+      if(!o||typeof o!=='object'||!Array.isArray(o.logs)||(o.birth&&!validBirth(o.birth)))throw new Error('形式');
+      if(o.time&&!/^\d{2}:\d{2}$/.test(o.time))throw new Error('形式');
+      if(o.place&&!cleanPlace(o.place))throw new Error('形式');
+      if(o.sex&&o.sex!=='m'&&o.sex!=='f')throw new Error('形式');
+      o.logs.forEach(function(l){
+        if(!l||typeof l.id!=='string'||!l.votes||!l.verdict||typeof l.at!=='string')throw new Error('形式');
+        ['num','tarot'].forEach(function(k){if(!l.votes[k]||!ST[l.votes[k].stance])throw new Error('形式');});
+        ['shi','star'].forEach(function(k){
+          const v=l.votes[k];
+          if(v){
+            if(!ST[v.stance]||typeof v.reason!=='string')throw new Error('形式');
+            if(k==='shi'&&(!Array.isArray(v.pillars)||v.pillars.length!==4||typeof v.dm!=='string'))throw new Error('形式');
+            if(k==='shi'&&v.luck&&(!Array.isArray(v.luck.list)||!v.luck.list.every(function(x){return x&&typeof x.p==='string'&&Number.isFinite(x.a);})||typeof v.luck.dir!=='string'||typeof v.luck.start!=='string'||!Number.isInteger(v.luck.cur)))throw new Error('形式');
+            if(k==='star'&&v.houses&&!Array.isArray(v.houses))throw new Error('形式');
+            if(k==='star'&&(!Array.isArray(v.chart)||!Array.isArray(v.aspects)))throw new Error('形式');
+          }
+        });
+        const tv=l.votes.tarot;
+        if(tv.cards){
+          if(!Array.isArray(tv.cards)||tv.cards.length!==3||!tv.cards.every(function(c){return c&&Number.isInteger(c.idx)&&c.idx>=0&&c.idx<78&&typeof c.rev==='boolean'&&typeof c.pos==='string';}))throw new Error('形式');
+        }else{
+          const ix=tv.idx;
+          if(!Number.isInteger(ix)||ix<0||ix>21)throw new Error('形式');
+        }
+        if(!l.verdict.key||!NEXT[l.verdict.key]||!ST[l.verdict.tone])throw new Error('形式');
+      });
+      state={birth:o.birth||'',time:o.time||'',place:cleanPlace(o.place),sex:(o.sex==='m'||o.sex==='f')?o.sex:'',hm:o.hm==='std'?'std':'solar',logs:o.logs};
+      save();
+      msg={kind:'ok',text:'復元しました。'};
+    }catch(err){
+      msg={kind:'err',text:'復元できませんでした。書き出した内容をそのまま貼り付けてください。'};
+    }
+    render();
+  }
+  else if(act==='delete-ask'){confirmDelete=true;render();}
+  else if(act==='delete-no'){confirmDelete=false;render();}
+  else if(act==='delete-yes'){
+    state={birth:'',time:'',place:null,sex:'',hm:'solar',logs:[]};
+    try{localStorage.removeItem(KEY);}catch(err){}
+    confirmDelete=false;
+    msg={kind:'ok',text:'すべて削除しました。'};
+    render();
+  }
+});
+
+document.addEventListener('submit',function(e){
+  const f=e.target;
+  e.preventDefault();
+  if(f.id==='f-consult'){
+    const g=function(n){return f.elements[n]?f.elements[n].value.trim():'';};
+    if(!state.birth){
+      const pr=parseProfile('');
+      if(pr.err){showErr('form-err',pr.err);return;}
+      state.birth=pr.birth;state.time=pr.time;state.place=pr.place;state.sex=pr.sex;state.hm=pr.hm;
+    }
+    const theme=g('theme'), optA=g('optA');
+    if(!theme||!optA){showErr('form-err','相談したいことと動く案を入力してください。');return;}
+    const now=new Date();
+    const nat=buildNatal(calcProfile(state));
+    const cat=THEMES[g('cat')]&&Object.prototype.hasOwnProperty.call(THEMES,g('cat'))?g('cat'):'general';
+    const votes={shi:shiSeat(nat,now),star:starSeat(nat,now,cat),num:numSeat(state.birth,now)};
+    votes.tarot=tarotSeat(drawCards());
+    const st=seatStats(state.logs);
+    const w={};
+    KEYS.forEach(function(k){w[k]=weightOf(st[k]);});
+    const vd=verdict(SEATS.map(function(s){return {stance:votes[s.k].stance,w:w[s.k]};}));
+    const log={id:newId(),at:now.toISOString(),theme:theme,cat:cat,optA:optA,optB:g('optB'),deadline:g('deadline'),note:g('note'),
+      votes:votes,weights:w,verdict:vd,outcome:null};
+    state.logs.push(log);
+    save();
+    ritual(function(){go('result',log.id);});
+  }
+  else if(f.id==='f-outcome'){
+    const fd=new FormData(f);
+    const action=fd.get('action'), result=fd.get('result'), helped=fd.get('helped');
+    if(!action||!result||!helped){showErr('o-err','3つの項目をすべて選んでください。');return;}
+    const log=state.logs.find(function(l){return l.id===f.getAttribute('data-id');});
+    if(!log)return;
+    log.outcome={action:action,result:result,helped:helped,at:new Date().toISOString()};
+    save();
+    editOutcome=false;
+    msg={kind:'ok',text:'結果を記録しました。'};
+    render();
+  }
+  else if(f.id==='f-profile'){
+    const pr=parseProfile('2');
+    if(pr.err){showErr('p-err',pr.err);return;}
+    state.birth=pr.birth;state.time=pr.time;state.place=pr.place;state.sex=pr.sex;state.hm=pr.hm;
+    save();
+    msg={kind:'ok',text:'出生情報を保存しました。'};
+    render();
+  }
+});
+
+render();
+})();
+</script>
+</body>
+</html>
