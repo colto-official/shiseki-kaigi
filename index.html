@@ -15,24 +15,12 @@
 <style>
 /* Layout: 1カラム。相談入力 → 4席の投票結果(○△×) → 論点整理 → 動く月の帯 → 次の一手 → 決定ログ */
 :root{
-  --bg:#F3EEE3; --surface:#FBF8F1; --fg:#201C3D; --muted:#5A5776; --line:#D2C8B4;
-  --accent:#4A3FA0; --accent-fg:#FFFFFF; --star:rgba(74,63,160,.16); --glow:rgba(74,63,160,.07); --tsh:none; --glow-e:rgba(74,63,160,.28);
-  --y:#1B6B45; --y-bg:#DCEEE3; --n:#A8362B; --n-bg:#F6E0DB; --h:#5B4DB1; --h-bg:#E6E2F6;
+
+  --bg:#0D0F24; --surface:#161937; --fg:#ECE8F6; --muted:#A9A8CA; --line:#2E3366;
+  --accent:#E3BF6B; --accent-fg:#1A1530; --star:rgba(236,232,246,.55); --glow:rgba(130,120,255,.16); --tsh:0 0 16px rgba(227,191,107,.35); --glow-e:rgba(227,191,107,.6);
+  --y:#6FD6A0; --y-bg:#10352E; --n:#FF9A8B; --n-bg:#3E1F2C; --h:#A9B4FF; --h-bg:#222A5C;
   --f-display:"Hiragino Mincho ProN","Yu Mincho","Noto Serif JP","Source Han Serif JP",serif;
   --f-body:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Noto Sans JP",system-ui,"Apple Symbols","Segoe UI Symbol","Noto Sans Symbols","DejaVu Sans",sans-serif;
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-  --bg:#0D0F24; --surface:#161937; --fg:#ECE8F6; --muted:#A9A8CA; --line:#2E3366;
-  --accent:#E3BF6B; --accent-fg:#1A1530; --star:rgba(236,232,246,.55); --glow:rgba(130,120,255,.16); --tsh:0 0 16px rgba(227,191,107,.35); --glow-e:rgba(227,191,107,.6);
-  --y:#6FD6A0; --y-bg:#10352E; --n:#FF9A8B; --n-bg:#3E1F2C; --h:#A9B4FF; --h-bg:#222A5C;
-    color-scheme:dark;
-  }
-}
-:root[data-theme="dark"]{
-  --bg:#0D0F24; --surface:#161937; --fg:#ECE8F6; --muted:#A9A8CA; --line:#2E3366;
-  --accent:#E3BF6B; --accent-fg:#1A1530; --star:rgba(236,232,246,.55); --glow:rgba(130,120,255,.16); --tsh:0 0 16px rgba(227,191,107,.35); --glow-e:rgba(227,191,107,.6);
-  --y:#6FD6A0; --y-bg:#10352E; --n:#FF9A8B; --n-bg:#3E1F2C; --h:#A9B4FF; --h-bg:#222A5C;
   color-scheme:dark;
 }
 *{box-sizing:border-box}
