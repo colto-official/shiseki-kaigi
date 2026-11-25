@@ -154,7 +154,8 @@ textarea.code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;m
 .panel.flat{background-image:none}
 .mast .emb{width:96px;height:96px;overflow:visible;filter:drop-shadow(0 0 9px var(--glow-e))}
 .mast .emb .rays{opacity:.75}
-.mast .emb .ring{transform-origin:60px 60px}
+.mast .emb .ringA,.mast .emb .ringB{transform-origin:60px 60px}
+.mast .emb .spark{transform-origin:67px 59px}
 .seat{background-image:radial-gradient(120% 60% at 100% 0,var(--glow),transparent 60%)}
 .seat h3{display:flex;align-items:center;gap:8px;letter-spacing:.05em}
 .seat h3 .ic{flex:none;width:22px;height:22px;color:var(--accent)}
@@ -173,8 +174,12 @@ textarea.code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;m
 @media (prefers-reduced-motion:no-preference){
   .seats .seat{animation:rise .7s ease-out both}
   .seats .seat:nth-child(2){animation-delay:.15s}.seats .seat:nth-child(3){animation-delay:.3s}.seats .seat:nth-child(4){animation-delay:.45s}
-  .mast .emb .ring{animation:spin 160s linear infinite}
+  .mast .emb .ringA{animation:spin 140s linear infinite}
+  .mast .emb .ringB{animation:spinrev 70s linear infinite}
   .mast .emb .rays{animation:breathe 5s ease-in-out infinite}
+  .mast .emb .spark{animation:pulse 3.6s ease-in-out infinite}
+  .mast .emb .tw{animation:twinkle 3s ease-in-out infinite}
+  .mast .emb{animation:emglow 6s ease-in-out infinite}
   .sp .tcard:not(.rev){animation:deal .7s ease-out both}
   .sp:nth-child(2) .tcard{animation-delay:.2s}.sp:nth-child(3) .tcard{animation-delay:.4s}
 }
@@ -251,6 +256,7 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 @keyframes flipin{0%{opacity:0;transform:translateY(26px) rotateY(90deg)}100%{opacity:1;transform:none}}
 @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 @keyframes shine{0%{background-position:-120% 0}100%{background-position:220% 0}}
+@keyframes emglow{0%,100%{filter:drop-shadow(0 0 6px rgba(227,191,107,.45))}50%{filter:drop-shadow(0 0 16px rgba(255,226,140,.85))}}
 @keyframes spinrev{to{transform:rotate(-360deg)}}
 @media (prefers-reduced-motion:no-preference){
   body::before{animation:twinkle 6s ease-in-out infinite}
@@ -295,6 +301,18 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 .chk li::before{content:counter(chk);position:absolute;left:12px;top:10px;width:22px;height:22px;border-radius:50%;background:var(--accent);color:var(--accent-fg);font-weight:700;font-size:.8rem;display:flex;align-items:center;justify-content:center}
 .chk li b{display:block;font-size:.95rem}
 .chk li span{color:var(--muted);font-size:.85rem}
+.dec{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.dec label,.optbox label{font-size:.8rem;color:var(--muted);font-weight:400}
+.st3row{display:flex;gap:8px;flex-wrap:wrap}
+.st3{font:inherit;font-size:.85rem;border:1px solid var(--line);background:transparent;color:var(--fg);border-radius:999px;padding:6px 14px;cursor:pointer;min-height:36px}
+.st3.ok.on{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.st3.ng.on{background:#7a2e3a;color:#fff;border-color:#c0566a}
+.optgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:560px){.optgrid{grid-template-columns:1fr}}
+.optbox{border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;background:var(--bg)}
+.decnow{border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:6px;padding:10px 14px;margin-top:12px;display:flex;flex-direction:column;gap:4px}
+.decnow.ok{border-left-color:#6fbf8a}.decnow.ng{border-left-color:#c0566a}
+.decnow b{font-size:.75rem;letter-spacing:.06em;color:var(--accent)}
 .rule{border:1px dashed var(--accent);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
 .rule b{font-size:.75rem;letter-spacing:.08em;color:var(--accent)}
 @media (prefers-reduced-motion:no-preference){.btn,.tab,.logrow{transition:background-color .15s,border-color .15s,color .15s}}
@@ -304,7 +322,7 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 <div class="wrap">
   <header class="mast">
     <div class="ttl">
-      <svg class="emb" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><defs><radialGradient id="emg"><stop offset="0" stop-color="currentColor" stop-opacity=".38"/><stop offset=".6" stop-color="currentColor" stop-opacity=".12"/><stop offset="1" stop-color="currentColor" stop-opacity="0"/></radialGradient></defs><g class="rays"><line x1="60.0" y1="13.0" x2="60.0" y2="0.0"/><line x1="72.2" y1="14.6" x2="73.7" y2="8.8"/><line x1="83.5" y1="19.3" x2="90.0" y2="8.0"/><line x1="93.2" y1="26.8" x2="97.5" y2="22.5"/><line x1="100.7" y1="36.5" x2="112.0" y2="30.0"/><line x1="105.4" y1="47.8" x2="111.2" y2="46.3"/><line x1="107.0" y1="60.0" x2="120.0" y2="60.0"/><line x1="105.4" y1="72.2" x2="111.2" y2="73.7"/><line x1="100.7" y1="83.5" x2="112.0" y2="90.0"/><line x1="93.2" y1="93.2" x2="97.5" y2="97.5"/><line x1="83.5" y1="100.7" x2="90.0" y2="112.0"/><line x1="72.2" y1="105.4" x2="73.7" y2="111.2"/><line x1="60.0" y1="107.0" x2="60.0" y2="120.0"/><line x1="47.8" y1="105.4" x2="46.3" y2="111.2"/><line x1="36.5" y1="100.7" x2="30.0" y2="112.0"/><line x1="26.8" y1="93.2" x2="22.5" y2="97.5"/><line x1="19.3" y1="83.5" x2="8.0" y2="90.0"/><line x1="14.6" y1="72.2" x2="8.8" y2="73.7"/><line x1="13.0" y1="60.0" x2="0.0" y2="60.0"/><line x1="14.6" y1="47.8" x2="8.8" y2="46.3"/><line x1="19.3" y1="36.5" x2="8.0" y2="30.0"/><line x1="26.8" y1="26.8" x2="22.5" y2="22.5"/><line x1="36.5" y1="19.3" x2="30.0" y2="8.0"/><line x1="47.8" y1="14.6" x2="46.3" y2="8.8"/></g><circle cx="60" cy="60" r="46" fill="url(#emg)" stroke="none"/><circle cx="60" cy="60" r="44"/><circle cx="60" cy="60" r="41.5" stroke-width=".7"/><g class="ring"><line x1="60.0" y1="31.0" x2="60.0" y2="19.0" stroke-width=".8"/><line x1="74.5" y1="34.9" x2="80.5" y2="24.5" stroke-width=".8"/><line x1="85.1" y1="45.5" x2="95.5" y2="39.5" stroke-width=".8"/><line x1="89.0" y1="60.0" x2="101.0" y2="60.0" stroke-width=".8"/><line x1="85.1" y1="74.5" x2="95.5" y2="80.5" stroke-width=".8"/><line x1="74.5" y1="85.1" x2="80.5" y2="95.5" stroke-width=".8"/><line x1="60.0" y1="89.0" x2="60.0" y2="101.0" stroke-width=".8"/><line x1="45.5" y1="85.1" x2="39.5" y2="95.5" stroke-width=".8"/><line x1="34.9" y1="74.5" x2="24.5" y2="80.5" stroke-width=".8"/><line x1="31.0" y1="60.0" x2="19.0" y2="60.0" stroke-width=".8"/><line x1="34.9" y1="45.5" x2="24.5" y2="39.5" stroke-width=".8"/><line x1="45.5" y1="34.9" x2="39.5" y2="24.5" stroke-width=".8"/><text x="69.2" y="25.7" text-anchor="middle" dominant-baseline="central" font-size="9.5" fill="currentColor" stroke="none">♈&#xFE0E;</text><text x="85.1" y="34.9" text-anchor="middle" dominant-baseline="central" font-size="9.5" fill="currentColor" stroke="none">♉&#xFE0E;</text><text x="94.3" y="50.8" text-anchor="middle" dominant-baseline="central" font-size="9.5" fill="currentColor" stroke="none">♊&#xFE0E;</text><text x="94.3" y="69.2" text-anchor="middle" dominant-baseline="central" font-size="9.5" fill="currentColor" stroke="none">♋&#xFE0E;</text><text x="85.1" y="85.1" text-anchor="middle" dominant-baseline="central" font-size="9.5" fill="currentColor" stroke="none">♌&#xFE0E;</text><text x="69.2" y="94.3" text-anchor="middle" dominant-baseline="central" font-size="9.5" fill="currentColor" stroke="none">♍&#xFE0E;</text><text x="50.8" y="94.3" text-anchor="middle" dominant-baseline="central" font-size="9.5" fill="currentColor" stroke="none">♎&#xFE0E;</text><text x="34.9" y="85.1" text-anchor="middle" dominant-baseline="central" font-size="9.5" fill="currentColor" stroke="none">♏&#xFE0E;</text><text x="25.7" y="69.2" text-anchor="middle" dominant-baseline="central" font-size="9.5" fill="currentColor" stroke="none">♐&#xFE0E;</text><text x="25.7" y="50.8" text-anchor="middle" dominant-baseline="central" font-size="9.5" fill="currentColor" stroke="none">♑&#xFE0E;</text><text x="34.9" y="34.9" text-anchor="middle" dominant-baseline="central" font-size="9.5" fill="currentColor" stroke="none">♒&#xFE0E;</text><text x="50.8" y="25.7" text-anchor="middle" dominant-baseline="central" font-size="9.5" fill="currentColor" stroke="none">♓&#xFE0E;</text></g><circle cx="60" cy="60" r="29"/><circle cx="60" cy="60" r="26.5" stroke-width=".7"/><g transform="translate(60 60) scale(.78) translate(-32 -32)"><path d="M38 16a16 16 0 1 0 0 32a12.5 12.5 0 1 1 0-32Z" stroke-width="1.7"/><path d="M42.5 21l1.3 3.7l3.8.1l-3 2.4l1.1 3.7l-3.2-2.2l-3.2 2.2l1.1-3.7l-3-2.4l3.8-.1Z" stroke-width="1.2" fill="currentColor" fill-opacity=".35"/></g><path d="M60 4.5l1.6 3.4l3.4 1.6l-3.4 1.6L60 14.5l-1.6-3.4L55 9.5l3.4-1.6Z" fill="currentColor" stroke="none" transform="translate(0 -4)"/></svg>
+      <svg class="emb" viewBox="0 0 120 120" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><defs><linearGradient id="emgold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFF3C4"/><stop offset=".42" stop-color="#E3BF6B"/><stop offset=".75" stop-color="#B8862F"/><stop offset="1" stop-color="#F3D98B"/></linearGradient><radialGradient id="emhalo"><stop offset="0" stop-color="#E3BF6B" stop-opacity=".30"/><stop offset=".65" stop-color="#8C7BFF" stop-opacity=".10"/><stop offset="1" stop-color="#8C7BFF" stop-opacity="0"/></radialGradient><radialGradient id="emcore"><stop offset="0" stop-color="#2A2457"/><stop offset="1" stop-color="#0D0F24"/></radialGradient></defs><circle cx="60" cy="60" r="58" fill="url(#emhalo)"/><g class="rays" fill="url(#emgold)" stroke="none"><path d="M55.99 14.18 L60.00 0.00 L64.01 14.18 Z"/><path d="M89.57 24.76 L102.43 17.57 L95.24 30.43 Z"/><path d="M105.82 55.99 L120.00 60.00 L105.82 64.01 Z"/><path d="M95.24 89.57 L102.43 102.43 L89.57 95.24 Z"/><path d="M64.01 105.82 L60.00 120.00 L55.99 105.82 Z"/><path d="M30.43 95.24 L17.57 102.43 L24.76 89.57 Z"/><path d="M14.18 64.01 L0.00 60.00 L14.18 55.99 Z"/><path d="M24.76 30.43 L17.57 17.57 L30.43 24.76 Z"/><path d="M74.98 16.51 L80.23 9.93 L79.44 18.31 Z"/><path d="M101.34 39.83 L109.71 38.90 L103.23 44.27 Z"/><path d="M103.49 74.98 L110.07 80.23 L101.69 79.44 Z"/><path d="M80.17 101.34 L81.10 109.71 L75.73 103.23 Z"/><path d="M45.02 103.49 L39.77 110.07 L40.56 101.69 Z"/><path d="M18.66 80.17 L10.29 81.10 L16.77 75.73 Z"/><path d="M16.51 45.02 L9.93 39.77 L18.31 40.56 Z"/><path d="M39.83 18.66 L38.90 10.29 L44.27 16.77 Z"/></g><g class="ringA" stroke="url(#emgold)"><circle cx="60" cy="60" r="44" stroke-width="1.4"/><circle cx="60" cy="60" r="41.5" stroke-width=".6"/><g stroke-width=".7"><line x1="60.00" y1="19.00" x2="60.00" y2="22.00"/><line x1="64.29" y1="19.22" x2="64.13" y2="20.72"/><line x1="68.52" y1="19.90" x2="68.21" y2="21.36"/><line x1="72.67" y1="21.01" x2="72.21" y2="22.43"/><line x1="76.68" y1="22.54" x2="76.07" y2="23.91"/><line x1="80.50" y1="24.49" x2="79.00" y2="27.09"/><line x1="84.10" y1="26.83" x2="83.22" y2="28.04"/><line x1="87.43" y1="29.53" x2="86.43" y2="30.65"/><line x1="90.47" y1="32.57" x2="89.35" y2="33.57"/><line x1="93.17" y1="35.90" x2="91.96" y2="36.78"/><line x1="95.51" y1="39.50" x2="92.91" y2="41.00"/><line x1="97.46" y1="43.32" x2="96.09" y2="43.93"/><line x1="98.99" y1="47.33" x2="97.57" y2="47.79"/><line x1="100.10" y1="51.48" x2="98.64" y2="51.79"/><line x1="100.78" y1="55.71" x2="99.28" y2="55.87"/><line x1="101.00" y1="60.00" x2="98.00" y2="60.00"/><line x1="100.78" y1="64.29" x2="99.28" y2="64.13"/><line x1="100.10" y1="68.52" x2="98.64" y2="68.21"/><line x1="98.99" y1="72.67" x2="97.57" y2="72.21"/><line x1="97.46" y1="76.68" x2="96.09" y2="76.07"/><line x1="95.51" y1="80.50" x2="92.91" y2="79.00"/><line x1="93.17" y1="84.10" x2="91.96" y2="83.22"/><line x1="90.47" y1="87.43" x2="89.35" y2="86.43"/><line x1="87.43" y1="90.47" x2="86.43" y2="89.35"/><line x1="84.10" y1="93.17" x2="83.22" y2="91.96"/><line x1="80.50" y1="95.51" x2="79.00" y2="92.91"/><line x1="76.68" y1="97.46" x2="76.07" y2="96.09"/><line x1="72.67" y1="98.99" x2="72.21" y2="97.57"/><line x1="68.52" y1="100.10" x2="68.21" y2="98.64"/><line x1="64.29" y1="100.78" x2="64.13" y2="99.28"/><line x1="60.00" y1="101.00" x2="60.00" y2="98.00"/><line x1="55.71" y1="100.78" x2="55.87" y2="99.28"/><line x1="51.48" y1="100.10" x2="51.79" y2="98.64"/><line x1="47.33" y1="98.99" x2="47.79" y2="97.57"/><line x1="43.32" y1="97.46" x2="43.93" y2="96.09"/><line x1="39.50" y1="95.51" x2="41.00" y2="92.91"/><line x1="35.90" y1="93.17" x2="36.78" y2="91.96"/><line x1="32.57" y1="90.47" x2="33.57" y2="89.35"/><line x1="29.53" y1="87.43" x2="30.65" y2="86.43"/><line x1="26.83" y1="84.10" x2="28.04" y2="83.22"/><line x1="24.49" y1="80.50" x2="27.09" y2="79.00"/><line x1="22.54" y1="76.68" x2="23.91" y2="76.07"/><line x1="21.01" y1="72.67" x2="22.43" y2="72.21"/><line x1="19.90" y1="68.52" x2="21.36" y2="68.21"/><line x1="19.22" y1="64.29" x2="20.72" y2="64.13"/><line x1="19.00" y1="60.00" x2="22.00" y2="60.00"/><line x1="19.22" y1="55.71" x2="20.72" y2="55.87"/><line x1="19.90" y1="51.48" x2="21.36" y2="51.79"/><line x1="21.01" y1="47.33" x2="22.43" y2="47.79"/><line x1="22.54" y1="43.32" x2="23.91" y2="43.93"/><line x1="24.49" y1="39.50" x2="27.09" y2="41.00"/><line x1="26.83" y1="35.90" x2="28.04" y2="36.78"/><line x1="29.53" y1="32.57" x2="30.65" y2="33.57"/><line x1="32.57" y1="29.53" x2="33.57" y2="30.65"/><line x1="35.90" y1="26.83" x2="36.78" y2="28.04"/><line x1="39.50" y1="24.49" x2="41.00" y2="27.09"/><line x1="43.32" y1="22.54" x2="43.93" y2="23.91"/><line x1="47.33" y1="21.01" x2="47.79" y2="22.43"/><line x1="51.48" y1="19.90" x2="51.79" y2="21.36"/><line x1="55.71" y1="19.22" x2="55.87" y2="20.72"/></g><g fill="url(#emgold)" stroke="none"><path d="M60.00 18.80 L62.00 16.05 L60.00 13.20 L58.00 16.05 Z"/><path d="M80.60 24.32 L83.71 22.93 L83.40 19.47 L80.25 20.94 Z"/><path d="M95.68 39.40 L99.06 39.75 L100.53 36.60 L97.07 36.29 Z"/><path d="M101.20 60.00 L103.95 62.00 L106.80 60.00 L103.95 58.00 Z"/><path d="M95.68 80.60 L97.07 83.71 L100.53 83.40 L99.06 80.25 Z"/><path d="M80.60 95.68 L80.25 99.06 L83.40 100.53 L83.71 97.07 Z"/><path d="M60.00 101.20 L58.00 103.95 L60.00 106.80 L62.00 103.95 Z"/><path d="M39.40 95.68 L36.29 97.07 L36.60 100.53 L39.75 99.06 Z"/><path d="M24.32 80.60 L20.94 80.25 L19.47 83.40 L22.93 83.71 Z"/><path d="M18.80 60.00 L16.05 58.00 L13.20 60.00 L16.05 62.00 Z"/><path d="M24.32 39.40 L22.93 36.29 L19.47 36.60 L20.94 39.75 Z"/><path d="M39.40 24.32 L39.75 20.94 L36.60 19.47 L36.29 22.93 Z"/></g></g><g class="ringB" stroke="url(#emgold)"><circle cx="60" cy="60" r="31" stroke-width=".8" stroke-dasharray="1.4 2.6"/><g fill="url(#emgold)" stroke="none"><circle cx="66.86" cy="34.40" r="1"/><circle cx="82.95" cy="46.75" r="1"/><circle cx="85.60" cy="66.86" r="1"/><circle cx="73.25" cy="82.95" r="1"/><circle cx="53.14" cy="85.60" r="1"/><circle cx="37.05" cy="73.25" r="1"/><circle cx="34.40" cy="53.14" r="1"/><circle cx="46.75" cy="37.05" r="1"/></g></g><circle cx="60" cy="60" r="23" fill="url(#emcore)" stroke="url(#emgold)" stroke-width="1.5"/><circle cx="60" cy="60" r="20.5" stroke="url(#emgold)" stroke-width=".5"/><path d="M62 43.5A17 17 0 1 0 62 76.5A13 13 0 1 1 62 43.5Z" fill="url(#emgold)" stroke="none"/><path class="spark" d="M67 49 L68.6 57.4 L77 59 L68.6 60.6 L67 69 L65.4 60.6 L57 59 L65.4 57.4 Z" fill="#FFF6D8" stroke="none"/><g class="tw" fill="#FFF3C4" stroke="none"><path d="M12 22 l1 3 3 1 -3 1 -1 3 -1 -3 -3 -1 3 -1z"/><path d="M104 96 l1 3 3 1 -3 1 -1 3 -1 -3 -3 -1 3 -1z"/><path d="M106 18 l.7 2 2 .7 -2 .7 -.7 2 -.7 -2 -2 -.7 2 -.7z"/></g></svg>
       <div><h1>四席会議</h1>
       <p class="sub">四つの占いで、迷いの理由を照らす</p></div>
     </div>
@@ -1482,7 +1500,7 @@ function viewConsult(){
   '<div class="row2"><div class="field"><label for="optA">動く案</label><input id="optA" name="optA" type="text" maxlength="80" required placeholder="例: 内定先に移る" autocomplete="off"'+pv('optA')+'></div>'+
   '<div class="field"><label for="optB">動かない案</label><input id="optB" name="optB" type="text" maxlength="80" placeholder="例: 今の会社に残る(空欄なら今のまま)" autocomplete="off"'+pv('optB')+'></div></div>'+
   '<div class="row2"><div class="field"><label for="deadline">決める期限(任意)</label><input id="deadline" name="deadline" type="date" min="'+todayStr()+'"></div></div>'+
-  '<div class="field"><label for="note">迷っている理由(任意)</label><textarea id="note" name="note" maxlength="400" placeholder="例: 条件は上がるが、仕事内容に不安がある"></textarea><p class="hint">占いの計算には使われません。後で見返すためのメモです。</p></div>'+
+  '<div class="field"><label for="note">迷っている理由(任意)</label><textarea id="note" name="note" maxlength="400" placeholder="例: 条件は上がるが、仕事内容に不安がある">'+esc(par?decNote(par):'')+'</textarea><p class="hint">占いの計算には使われません。確認項目の選び方と、後で見返すためのメモに使います。</p></div>'+
   '<div id="form-err" class="msg err" role="alert" hidden></div>'+
   '<div class="btns"><button class="btn" type="submit">四席を招く</button><button class="btn ghost" type="button" data-act="example">例を入れる</button></div>'+
   '</form></section>';
@@ -1612,11 +1630,23 @@ function threadHtml(log){
   }).join('');
   return '<section class="panel"><h2>この相談の流れ</h2><ol class="tl">'+items+'</ol></section>';
 }
+function decSum(p){
+  if(!p.dec)return '';
+  const d=getDec(p);
+  const fd=d.c.map(function(x){return x.fd?x.fd+(x.st==='ok'?'(○)':x.st==='ng'?'(×)':''):'';}).filter(Boolean);
+  return fd.length?'<span>前回の確認: '+esc(fd.join(' / '))+'</span>':'';
+}
+function decNote(p){
+  if(!p||!p.dec)return '';
+  const d=getDec(p);
+  const fd=d.c.map(function(x){return x.fd?x.fd+(x.st==='ok'?'(線を満たした)':x.st==='ng'?'(線を満たさない)':''):'';}).filter(Boolean);
+  return fd.length?'前回の確認: '+fd.join('、'):'';
+}
 function parentInfoHtml(id){
   const p=state.logs.find(function(x){return x.id===id;});
   if(!p)return '';
   const oc=p.outcome?(' / '+({moved:'動いた',stayed:'動かなかった'}[p.outcome.action]||'')+'・'+({good:'結果は良かった',bad:'結果は悪かった',unknown:'結果はまだ分からない'}[p.outcome.result]||'')):'';
-  return '<div class="msg parent-box"><b>前回('+fmt(p.at)+')</b><span>'+esc(p.theme)+'</span><span>動く案: '+esc(p.optA)+(p.optB?' / 動かない案: '+esc(p.optB):'')+'</span><span>四席の託宣: '+esc(p.verdict.label)+esc(oc)+'</span></div>';
+  return '<div class="msg parent-box"><b>前回('+fmt(p.at)+')</b><span>'+esc(p.theme)+'</span><span>動く案: '+esc(p.optA)+(p.optB?' / 動かない案: '+esc(p.optB):'')+'</span><span>四席の託宣: '+esc(p.verdict.label)+esc(oc)+'</span>'+decSum(p)+'</div>';
 }
 
 
@@ -1715,29 +1745,117 @@ function planDate(log){
   const d=new Date(log.at);d.setDate(d.getDate()+14);
   return {d:d.toLocaleDateString('ja-JP',{year:'numeric',month:'numeric',day:'numeric'}),own:false};
 }
-function planHtml(log){
-  const key=log.verdict.key, cat=CHECK[log.cat]?log.cat:'general';
-  const base=CHECK[cat].slice();
+const KW=[
+ {re:/転職|退職|内定|就職|入社|採用/,items:[
+  {t:'オファー条件を書面で受け取る',h:'年収・役割・勤務地・試用期間が書かれた書面をもらい、口頭の説明と違いがないか見る。'},
+  {t:'退職の手順と時期',h:'いまの就業規則で、退職の申出時期と引き継ぎ期間を確認し、最短でいつ動けるか日付を出す。'},
+  {t:'いまの会社に出す結論の期限',h:'返事の期限を相手に聞いて、その日までに決める日を、自分のカレンダーに入れる。'}]},
+ {re:/契約|更新|解約|申込|申し込/,items:[
+  {t:'解約条件と違約金を読む',h:'契約書の「解約」「更新」「違約」の項を読んで、やめるときの費用と期限をメモする。'},
+  {t:'総額で比べる',h:'初期費用+月額×期間+更新料などを足して、総額を出す。月額だけで比べない。'},
+  {t:'ほかの1社と比べる',h:'条件の近い別の選択肢を1つだけ調べて、差を3つ書く。'}]},
+ {re:/購入|買う|買い替|買い換|ローン|購買/,items:[
+  {t:'総額と月々の支払い',h:'本体のほか、維持費・保険・ローン金利を足した総額と、毎月の支払いを出す。'},
+  {t:'代わりの手段',h:'借りる・中古・待つ、のどれかで同じ目的が果たせないか、1つ調べる。'},
+  {t:'手放すときの価値',h:'売るときにいくらになるか、いまの相場を1件調べて書く。'}]},
+ {re:/引っ?越|住み替|賃貸|物件|入居|転居/,items:[
+  {t:'家賃+通勤+初期費用の総額',h:'1年あたりの総額を、いまの住まいと並べて出す。'},
+  {t:'周辺を昼と夜に歩く',h:'昼と夜で1回ずつ、駅から物件まで歩いて、音・人通り・明るさをメモする。'},
+  {t:'いまの住まいの解約時期',h:'解約の予告期間と違約金を確認して、二重家賃が出る月数を数える。'}]},
+ {re:/結婚|告白|別れ|復縁|付き合|交際|プロポーズ/,items:[
+  {t:'自分が一番ほしい関係を一文で',h:'相手の気持ちは置いて、自分がどうなりたいかを、一文で書く。'},
+  {t:'相手に確かめたいことを1つ決める',h:'聞かないと分からないことを1つに絞り、聞く場面を決める。'},
+  {t:'時間を置いても変わらないか',h:'3日置いて、同じ気持ちかをもう一度書く。変わったら、その理由も書く。'}]},
+ {re:/勉強|資格|入学|留学|学び|習い|スクール/,items:[
+  {t:'費用と、週に使える時間',h:'総費用と、続けるために毎週確保できる時間を、具体的な時間帯で書く。'},
+  {t:'終えたら何が変わるか',h:'修了後に変わることを1つ書き、それが叶った人の例を1件探す。'},
+  {t:'無料の体験・過去問で試す',h:'お金を払う前に、体験授業か過去問を1回やって、続けられそうか見る。'}]},
+ {re:/投資|副業|起業|独立|開業/,items:[
+  {t:'失ってよい金額の上限',h:'ゼロになっても生活が崩れない金額を決めて、その範囲に収める。'},
+  {t:'最初の1か月の最小テスト',h:'本格的に始める前に、1か月でできる一番小さい試しを決める。'},
+  {t:'収入が出るまでの生活資金',h:'収入がゼロでも暮らせる月数を出す。'}]}
+];
+function kwItems(log){
+  const txt=[log.theme,log.optA,log.optB,log.note].join(' ');
+  for(let i=0;i<KW.length;i++){if(KW[i].re.test(txt))return KW[i].items;}
+  return [];
+}
+function planItems(log){
+  const cat=CHECK[log.cat]?log.cat:'general';
+  const kw=kwItems(log);
+  const main=kw.slice(0,2).concat(CHECK[cat]).filter(function(x,i,ar){return ar.findIndex(function(y){return y.t===x.t;})===i;});
   const special=[];
   const tv=log.votes.tarot;
+  const key=log.verdict.key;
   if((key==='wait'||key==='split'||key==='lean_go'||key==='lean_stay')&&tv&&Array.isArray(tv.cards)&&tv.cards[1]){
     special.push({t:'障害の札「'+tv.cards[1].kw+'」の心当たり',h:'タロットが示したつまずきやすい点です。当てはまることを1つ書き出してください。それが、最初に確かめるべきことの候補になります。'});
   }
   const sv=log.votes.star;
-  if(sv&&sv.retro)special.push({t:'契約・提出の前の読み直し',h:'水星が逆行中です。申込や契約は、内容を読み直す時間を取って、その場で確定しないようにします。'});
-  const all=special.concat(base);
-  const top=all.slice(0,3), rest=all.slice(3);
+  const retro=(sv&&sv.retro)?{t:'契約・提出の前の読み直し',h:'水星が逆行中です。申込や契約は、内容を読み直す時間を取って、その場で確定しないようにします。'}:null;
+  let top, rest;
+  if(special.length){top=main.slice(0,2).concat(special);rest=main.slice(2);}
+  else{top=main.slice(0,3);rest=main.slice(3);}
+  if(retro)rest=rest.concat([retro]);
+  return {main:main,top:top,rest:rest,kw:kw.length>0};
+}
+function getDec(log){
+  const d=log.dec&&typeof log.dec==='object'?log.dec:{};
+  const cl=function(v,n){return typeof v==='string'?v.slice(0,n):'';};
+  const o=d.o||{};
+  const side=function(x){x=x||{};return {g:cl(x.g,200),l:cl(x.l,200),b:(x.b==='yes'||x.b==='part'||x.b==='no')?x.b:''};};
+  const c=[];
+  for(let i=0;i<3;i++){const x=(Array.isArray(d.c)&&d.c[i])||{};c.push({ln:cl(x.ln,200),fd:cl(x.fd,200),st:(x.st==='ok'||x.st==='ng')?x.st:''});}
+  return {o:{a:side(o.a),b:side(o.b)},c:c,q:cl(d.q,200)};
+}
+function collectDec(f,log){
+  const d=getDec(log);
+  const g=function(n){return f.elements[n]?f.elements[n].value.trim().slice(0,200):'';};
+  ['a','b'].forEach(function(k){
+    d.o[k].g=g('o'+k+'g');d.o[k].l=g('o'+k+'l');
+    const bv=g('o'+k+'b');d.o[k].b=(bv==='yes'||bv==='part'||bv==='no')?bv:'';
+  });
+  for(let i=0;i<3;i++){d.c[i].ln=g('ln'+i);d.c[i].fd=g('fd'+i);}
+  d.q=g('q');
+  log.dec=d;
+  return d;
+}
+function decNow(log,dec){
+  const key=log.verdict.key, A=log.optA, B=log.optB||'今のまま';
+  const stayish=(key==='lean_stay'||key==='stay');
+  const ok=dec.c.filter(function(x){return x.st==='ok';}).length;
+  const ng=dec.c.filter(function(x){return x.st==='ng';}).length;
+  const open=3-ok-ng;
+  let head, body, cls='';
+  if(ng>0){
+    cls='ng';head='×が付いた項目があります';
+    body='ルール通りなら、「'+B+'」を続けます。どうしても動きたいときは、×の点を直せるか(交渉・条件変更・小さく試す)を先に考えます。';
+  }else if(open>0){
+    head='あと'+open+'項目、未確認です';
+    body='確認が済むまで、無理に決めなくて大丈夫です。'+(ok?ok+'項目は○になっています。':'まず1項目だけ、確かめてみてください。');
+  }else{
+    cls='ok';head='3項目とも○です';
+    body=stayish?'動く理由が確かめられました。「'+A+'」を再検討できます。':'ルール通りなら、「'+A+'」を実行できる材料がそろいました。';
+  }
+  const warn=[];
+  if(!ng&&!open&&dec.o.a.b==='no'&&!dec.q)warn.push('「'+A+'」は戻せない選択として書かれています。下の「やめる・戻すライン」を書いてから決めましょう。');
+  dec.c.forEach(function(x,i){if(x.st==='ok'&&!x.ln&&!x.fd)warn.push('項目'+(i+1)+'は○ですが、基準も確認した内容も空です。何を見て○にしたか、1行書いておくと、後で振り返れます。');});
+  return '<div class="decnow '+cls+'" role="status"><b>いまの判断(あなたが書いた基準による整理)</b><p><strong>'+esc(head)+'</strong></p><p>'+esc(body)+'</p>'+warn.map(function(w){return '<p class="hint">'+esc(w)+'</p>';}).join('')+'<p class="hint">占いの結果ではなく、あなたの○×で決まります。最後に選ぶのは、あなたです。</p></div>';
+}
+function planHtml(log){
+  const key=log.verdict.key;
+  const pi=planItems(log), top=pi.top, rest=pi.rest, main=pi.main;
+  const dec=getDec(log);
   const pd=planDate(log);
   const A=log.optA, B=log.optB||'今のまま';
   const lead={
-    wait:'全席が様子見です。「動くか止めるか」の前に、確かめたいことが残っている状態です。下の3つを確かめれば、次の相談で結論が出しやすくなります。',
+    wait:'全席が様子見です。「動くか止めるか」の前に、確かめたいことが残っている状態です。下の3つを確かめて、基準(線)を自分で決めれば、結論が出しやすくなります。',
     split:'席の意見が割れたのは、まだ確かめていない点があるからです。下の3つを確かめて、割れ目を埋めましょう。',
     lean_go:'動く寄りですが、反対の席が気にしている点を、先に確かめてから動きましょう。',
     lean_stay:'見送り寄りです。見送る前に、賛成の席が見ていた可能性を、下の確認で試しておきましょう。',
     go:'動く方向でそろいました。動く前に、最後の確認を済ませましょう。',
     stay:'見送る方向でそろいました。見送りで納得できるか、下の確認で試しておきましょう。'
   }[key];
-  const t1=base[0].t, t2=base[1]?base[1].t:base[0].t, tt=top[0].t;
+  const t1=main[0].t, t2=main[1]?main[1].t:main[0].t, tt=top[0].t;
   const rule={
     wait:'もし「'+t1+'」と「'+t2+'」に問題がなければ、「'+A+'」を実行します。問題があれば、「'+B+'」を続けます。',
     split:'もし「'+t1+'」と「'+t2+'」に問題がなければ、「'+A+'」を実行します。問題があれば、「'+B+'」を続けます。',
@@ -1746,12 +1864,33 @@ function planHtml(log){
     lean_stay:'基本は「'+B+'」を続けます。「'+t1+'」を確かめて、動く理由が見つかったら、「'+A+'」に戻すか、もう一度相談します。',
     stay:'基本は「'+B+'」を続けます。「'+t1+'」を確かめて、動く理由が見つかったら、「'+A+'」を再検討します。'
   }[key];
-  const items=top.map(function(x){return '<li><b>'+esc(x.t)+'</b><span>'+esc(x.h)+'</span></li>';}).join('');
+  const stBtn=function(i,v,label,cur){return '<button class="st3 '+v+(cur===v?' on':'')+'" type="button" data-act="dstat" data-i="'+i+'" data-v="'+v+'" aria-pressed="'+(cur===v)+'">'+label+'</button>';};
+  const items=top.map(function(x,i){
+    const c=dec.c[i];
+    return '<li><b>'+esc(x.t)+'</b><span>'+esc(x.h)+'</span>'+
+      '<div class="dec"><label for="ln'+i+'">決める線(例: 手取りが今より月3万円以上増える)</label><input type="text" id="ln'+i+'" name="ln'+i+'" maxlength="200" value="'+esc(c.ln)+'" autocomplete="off">'+
+      '<label for="fd'+i+'">確かめた内容</label><input type="text" id="fd'+i+'" name="fd'+i+'" maxlength="200" value="'+esc(c.fd)+'" autocomplete="off">'+
+      '<div class="st3row" role="group" aria-label="線を満たしたか">'+stBtn(i,'ok','○ 線を満たした',c.st)+stBtn(i,'ng','× 満たさない',c.st)+'</div></div></li>';
+  }).join('');
   const more=rest.length?'<details class="more"><summary>ほかの確認候補('+rest.length+')</summary><ol class="chk" style="margin-top:8px;counter-reset:chk 3">'+rest.map(function(x){return '<li><b>'+esc(x.t)+'</b><span>'+esc(x.h)+'</span></li>';}).join('')+'</ol></details>':'';
-  return '<section class="panel"><h2>何を確かめるか(確認リスト)</h2><p>'+esc(lead)+'</p><ol class="chk">'+items+'</ol>'+more+
+  const bSel=function(k,v){return '<select name="o'+k+'b" aria-label="元に戻せるか"><option value=""'+(v===''?' selected':'')+'>選ぶ</option><option value="yes"'+(v==='yes'?' selected':'')+'>戻せる</option><option value="part"'+(v==='part'?' selected':'')+'>一部なら戻せる</option><option value="no"'+(v==='no'?' selected':'')+'>戻せない</option></select>';};
+  const side=function(k,name,d){
+    return '<div class="optbox"><b>'+esc(name)+'</b>'+
+      '<label for="o'+k+'g">得るもの</label><input type="text" id="o'+k+'g" name="o'+k+'g" maxlength="200" value="'+esc(d.g)+'" autocomplete="off">'+
+      '<label for="o'+k+'l">失うもの</label><input type="text" id="o'+k+'l" name="o'+k+'l" maxlength="200" value="'+esc(d.l)+'" autocomplete="off">'+
+      '<label for="o'+k+'b">元に戻せるか</label>'+bSel(k,d.b)+'</div>';
+  };
+  return '<section class="panel"><form id="f-dec" data-id="'+esc(log.id)+'" autocomplete="off"><h2>何を確かめるか(確認リスト)</h2><p>'+esc(lead)+'</p>'+
+    (pi.kw?'<p class="hint">相談の内容に合わせて、項目を入れ替えています。</p>':'')+
+    '<ol class="chk">'+items+'</ol>'+more+
     '<div class="rule"><b>判断のルール</b><p>'+esc(rule)+'</p><p class="hint">'+(pd.own?'期限: ':'期限が未設定なので、2週間後を目安に: ')+esc(pd.d)+'までに確かめて、決めます。</p></div>'+
+    '<h2 style="margin-top:18px">2つの案を並べる</h2><p class="hint">占いは事実を教えてくれません。ここは、あなたが書く欄です。空でも、今まで通り使えます。</p>'+
+    '<div class="optgrid">'+side('a','動く案: '+A,dec.o.a)+side('b','動かない案: '+B,dec.o.b)+'</div>'+
+    '<div class="field" style="margin-top:10px"><label for="q">やめる・戻すライン(これが起きたら引き返す)</label><input type="text" id="q" name="q" maxlength="200" value="'+esc(dec.q)+'" placeholder="例: 3か月たって残業が月40時間を超えたら、転職先を探し直す" autocomplete="off"></div>'+
+    decNow(log,dec)+
     '<p class="todo"><b>今日の5分でできること</b>'+esc('「'+tt+'」について、分かっていることを、メモに3行で書き出します。')+'</p>'+
-    '<div class="btns"><button class="btn" type="button" data-act="continue" data-id="'+esc(log.id)+'">確かめたら、続きを相談する</button></div></section>';
+    '<p class="hint">ここに書いた内容は、この端末の中にだけ保存されます。外部には送られません。</p>'+
+    '<div class="btns"><button class="btn" type="submit">メモを保存する</button><button class="btn ghost" type="button" data-act="continue" data-id="'+esc(log.id)+'">確かめたら、続きを相談する</button></div></form></section>';
 }
 
 function viewResult(log){
@@ -1900,7 +2039,7 @@ document.addEventListener('change',function(e){
     if(info)info.innerHTML=t.value?parentInfoHtml(t.value):'';
     const p=state.logs.find(function(x){return x.id===t.value;});
     const set=function(id,v){const el=document.getElementById(id);if(el&&!el.value)el.value=v;};
-    if(p){set('theme',p.theme);set('optA',p.optA);set('optB',p.optB||'');const c=document.getElementById('cat');if(c&&c.value==='general'&&THEMES[p.cat])c.value=p.cat;}
+    if(p){set('theme',p.theme);set('optA',p.optA);set('optB',p.optB||'');set('note',decNote(p));const c=document.getElementById('cat');if(c&&c.value==='general'&&THEMES[p.cat])c.value=p.cat;}
   }
   if(t&&t.id&&t.id.indexOf('bplace')===0){
     const box=document.getElementById('pother'+t.id.slice(6));
@@ -1920,6 +2059,12 @@ document.addEventListener('click',function(e){
     const set=function(id,v){const el=document.getElementById(id);if(el)el.value=v;};
     set('theme','転職するか迷っている');set('optA','内定先に移る');set('optB','今の会社に残る');
     set('note','条件は上がるが、仕事内容に不安がある');
+  }
+  else if(act==='dstat'){
+    const f=document.getElementById('f-dec');const lg=f&&state.logs.find(function(x){return x.id===f.getAttribute('data-id');});
+    if(lg){collectDec(f,lg);const i=+t.getAttribute('data-i'),v=t.getAttribute('data-v');
+      if(i>=0&&i<3){lg.dec.c[i].st=(lg.dec.c[i].st===v)?'':v;}
+      save();const y=window.scrollY;render();window.scrollTo(0,y);}
   }
   else if(act==='edit-outcome'){editOutcome=true;render();}
   else if(act==='cancel-outcome'){editOutcome=false;render();}
@@ -1985,6 +2130,11 @@ document.addEventListener('click',function(e){
 document.addEventListener('submit',function(e){
   const f=e.target;
   e.preventDefault();
+  if(f.id==='f-dec'){
+    const lg=state.logs.find(function(x){return x.id===f.getAttribute('data-id');});
+    if(lg){collectDec(f,lg);save();const y=window.scrollY;msg={kind:'ok',text:'保存しました。'};render();window.scrollTo(0,y);}
+    return;
+  }
   if(f.id==='f-consult'){
     const g=function(n){return f.elements[n]?f.elements[n].value.trim():'';};
     if(!state.birth){
