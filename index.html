@@ -288,6 +288,15 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;ba
   .tab{transition:color .2s,border-color .2s,transform .15s}.tab:active{transform:scale(.94)}
   details.more[open]>*:not(summary){animation:enter .4s ease-out both}
 }
+.todo{border-left:3px solid var(--accent);background:var(--bg);border-radius:0 6px 6px 0;padding:8px 12px;font-size:.9rem;line-height:1.65}
+.todo b{display:block;font-size:.72rem;letter-spacing:.08em;color:var(--accent);margin-bottom:2px}
+.chk{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px;counter-reset:chk}
+.chk li{counter-increment:chk;border:1px solid var(--line);border-radius:8px;padding:10px 12px 10px 44px;position:relative;background:var(--bg)}
+.chk li::before{content:counter(chk);position:absolute;left:12px;top:10px;width:22px;height:22px;border-radius:50%;background:var(--accent);color:var(--accent-fg);font-weight:700;font-size:.8rem;display:flex;align-items:center;justify-content:center}
+.chk li b{display:block;font-size:.95rem}
+.chk li span{color:var(--muted);font-size:.85rem}
+.rule{border:1px dashed var(--accent);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.rule b{font-size:.75rem;letter-spacing:.08em;color:var(--accent)}
 @media (prefers-reduced-motion:no-preference){.btn,.tab,.logrow{transition:background-color .15s,border-color .15s,color .15s}}
 @media (max-width:480px){.mast .emb{width:80px;height:80px}.mast h1{font-size:1.8rem}.panel{padding:16px}.verdict .big{font-size:1.6rem}}
 </style>
@@ -1259,7 +1268,7 @@ function pointsFor(v){
     return out;
   }
   if(by.h.length===present.length){
-    out.push('全席が様子見です。決める材料が足りていない状態と読めます。期限までに集める情報を決め、判断を保留する理由をはっきりさせてください。');
+    out.push('全席が様子見です。決める材料が足りていない状態と読めます。下の「何を確かめるか」から3つ選び、いつまでに確かめるかを決めましょう。確かめる中身は、分野ごとに具体的に書いてあります。');
     return out;
   }
   const parts=[];
@@ -1274,9 +1283,9 @@ function pointsFor(v){
   const time=['shi','star','num'].filter(function(k){return v[k];});
   const tY=time.filter(function(k){return v[k]==='y';}).length, tN=time.filter(function(k){return v[k]==='n';}).length;
   const t=v.tarot;
-  if(t==='n'&&tY>=2)out.push('時期を見る席の多くは追い風ですが、タロットは今の進め方や条件への引っかかりを示しています。時期は合っていても、条件に問題が残っているかもしれません。条件の見直しを先に行ってください。');
-  else if(t==='y'&&tN>=2)out.push('タロットは前向きですが、時期を見る席の多くは向かい風です。意欲に対して、タイミングか土台が追いついていない可能性があります。動く前に基盤を確認してください。');
-  else if(t==='h'&&tY>=2)out.push('時期は追い風ですが、現状の見立ては様子見です。情報か準備が足りない可能性があります。足りない情報を1つ特定してから動く形が合います。');
+  if(t==='n'&&tY>=2)out.push('時期を見る席の多くは追い風ですが、タロットは今の進め方や条件への引っかかりを示しています。時期は合っていても、条件に問題が残っているかもしれません。条件の見直しを先に行ってください。具体的な確認項目は、下の「何を確かめるか」にあります。');
+  else if(t==='y'&&tN>=2)out.push('タロットは前向きですが、時期を見る席の多くは向かい風です。意欲に対して、タイミングか土台が追いついていない可能性があります。動く前に基盤を確認してください。確認する中身は、下の「何を確かめるか」にあります。');
+  else if(t==='h'&&tY>=2)out.push('時期は追い風ですが、現状の見立ては様子見です。情報か準備が足りない可能性があります。下の「何を確かめるか」から足りない情報を1つ特定してから動く形が合います。');
   else if(t==='y'&&time.length&&tY===0&&tN===0)out.push('現状は前向きで、時期は慎重な側です。大きく動くより、小さく試す形が合います。');
   return out;
 }
@@ -1284,8 +1293,8 @@ function pointsFor(v){
 const NEXT={
   go:['動く案を最小の形で試せないか考えます(お試し期間、兼務、相談だけ先に行うなど)。','最悪の場合の損失を書き出し、許容範囲か確認します。','期限の前に実行日を1つ決めて、このログに残します。'],
   lean_go:['動く案の中で、いちばん不確かな点を1つ選んで確認します。','確認が取れたら、小さく始めます。','1〜2週間後に見直す日を決めます。'],
-  split:['割れた理由(上の論点整理)を、自分の言葉で書き直します。','その論点を確かめる質問を1つ作り、期限前に答えを得ます。','答えが出るまで、取り返しのつかない動きは避けます。'],
-  wait:['判断に足りない情報を3つまで書き出します。','誰がいつまでに集めるかを決めます。','期限が来たら、集めた情報を持ってもう一度この会議にかけます。'],
+  split:['上の「確認リスト」から、割れ目に近い項目を1つ選びます。','その項目を、期限の前に確かめます。','答えが出るまで、取り返しのつかない動きは避けます。確かめたら、「この続きを相談する」へ。'],
+  wait:['上の「確認リスト」の3つを、日付を入れてメモに写します。','今日、いちばん上の項目を5分だけやります。','確かめ終わったら、「この続きを相談する」から、もう一度この会議にかけます。'],
   lean_stay:['見送る前提で、動かない案を続ける条件を整えます。','動く案に戻るきっかけを1つ決めておきます。','下の月の帯で追い風の月を選び、その時期に見直します。'],
   stay:['動かない案のデメリットを書き出し、見送りで納得できるか確認します。','見送る場合の再検討日を決めます。','再検討日をこのログに残します。']
 };
@@ -1528,29 +1537,29 @@ function seatHtml(k,log){
     }
     const tl={y:'いまの巡りは追い風です。思い切って動いても、流れに乗りやすい時期です。',n:'いまの巡りは向かい風です。準備を整えて、慎重に進めるほうが安全です。',h:'追い風と向かい風が混ざる巡りです。条件を確かめながら進めるのが合います。'}[v.stance];
     const lead='あなたの核は「'+ELEM[dmElem(v)]+'」('+(v.strLabel||'')+')。'+tl;
-    return seatCard2(meta,v,shiHero(v),leadHtml(lead),'<div class="pillars" aria-label="命式">'+cells+'</div><p class="sub">太枠が日主('+esc(v.dm)+')です。</p>'+(typeof v.ratio==='number'?strHtml:'')+luckHtml+'<p>'+esc(v.reason)+'</p>'+notesHtml(v.notes));
+    return seatCard2(meta,v,shiHero(v),leadHtml(lead)+todoHtml('shi',v),'<div class="pillars" aria-label="命式">'+cells+'</div><p class="sub">太枠が日主('+esc(v.dm)+')です。</p>'+(typeof v.ratio==='number'?strHtml:'')+luckHtml+'<p>'+esc(v.reason)+'</p>'+notesHtml(v.notes));
   }
   if(k==='star'){
     const all=(v.aspects||[]).concat(v.houses||[]);
     const asp=all.length?'<ul>'+all.map(function(a){return '<li>'+esc(a.t)+'。'+esc(a.m)+'</li>';}).join('')+'</ul>':'';
     const tl2={y:'全体として、動く案には追い風の配置です。',n:'全体として、慎重さを求める配置です。',h:'追い風と向かい風が混ざり、決め手に欠ける配置です。'}[v.stance];
     const lead2=(typeof v.hl==='string'&&v.hl?v.hl:'')+tl2;
-    return seatCard2(meta,v,starHero(v),leadHtml(lead2),'<div class="chart">'+v.chart.map(function(c){return '<span>'+esc(c)+'</span>';}).join('')+'</div>'+asp+'<p>'+esc(v.reason)+'</p>'+notesHtml(v.notes));
+    return seatCard2(meta,v,starHero(v),leadHtml(lead2)+todoHtml('star',v),'<div class="chart">'+v.chart.map(function(c){return '<span>'+esc(c)+'</span>';}).join('')+'</div>'+asp+'<p>'+esc(v.reason)+'</p>'+notesHtml(v.notes));
   }
   if(k==='num'){
     const pi=PY[v.py];
-    const lead3='今年は「'+(pi?pi.t:'')+'」の年(個人年'+v.py+')。'+{y:'動く案には追い風です。',n:'動く案には向かい風です。',h:'動く案は条件しだいです。'}[v.stance];
-    return seatCard2(meta,v,numHero(v),leadHtml(lead3),'<p>'+esc(v.reason)+'</p><p class="sub">ライフパス'+v.lp+'('+esc(LP[v.lp])+') / 今月は個人月'+v.pm+'</p>');
+    const lead3='今年は「'+(pi?pi.t:'')+'」の年(個人年'+v.py+')。'+{y:'動く案には追い風です。',n:'動く案には向かい風です。',h:'動く案は、確認が済むかどうかで決まります。'}[v.stance];
+    return seatCard2(meta,v,numHero(v),leadHtml(lead3)+todoHtml('num',v),'<p>'+esc(v.reason)+'</p><p class="sub">ライフパス'+v.lp+'('+esc(LP[v.lp])+') / 今月は個人月'+v.pm+'</p>');
   }
   if(Array.isArray(v.cards)){
     const rows=v.cards.map(function(c){
       const art=cardArt(c.idx), t=TAROT[c.idx];
       return '<div class="sp"><div class="tcard sm'+(c.rev?' rev':'')+'" aria-hidden="true">'+cardSvg(c.idx)+'</div><div class="cap"><small>'+esc(c.pos)+'</small><p><b>'+esc(t[0])+(c.rev?'(逆位置)':'(正位置)')+'</b></p><p class="sub">'+esc(c.kw)+'。'+esc(c.tx)+'</p></div></div>';
     }).join('');
-    return seatCard(meta,v,'<div class="spread">'+rows+'</div><p>'+esc(v.reason)+'</p>');
+    return seatCard(meta,v,todoHtml('tarot',v)+'<div class="spread">'+rows+'</div><p>'+esc(v.reason)+'</p>');
   }
   const card=TAROT[v.idx];
-  return seatCard(meta,v,'<div class="tarot"><div class="tcard'+(v.rev?' rev':'')+'" aria-hidden="true">'+cardSvg(v.idx)+'</div><div><p><b>'+esc(card[0])+(v.rev?'(逆位置)':'(正位置)')+'</b></p><p class="sub">'+esc(v.kw)+'</p></div></div><p>'+esc(v.reason)+'</p>');
+  return seatCard(meta,v,todoHtml('tarot',v)+'<div class="tarot"><div class="tcard'+(v.rev?' rev':'')+'" aria-hidden="true">'+cardSvg(v.idx)+'</div><div><p><b>'+esc(card[0])+(v.rev?'(逆位置)':'(正位置)')+'</b></p><p class="sub">'+esc(v.kw)+'</p></div></div><p>'+esc(v.reason)+'</p>');
 }
 
 function stripHtml(log){
@@ -1610,6 +1619,141 @@ function parentInfoHtml(id){
   return '<div class="msg parent-box"><b>前回('+fmt(p.at)+')</b><span>'+esc(p.theme)+'</span><span>動く案: '+esc(p.optA)+(p.optB?' / 動かない案: '+esc(p.optB):'')+'</span><span>四席の託宣: '+esc(p.verdict.label)+esc(oc)+'</span></div>';
 }
 
+
+/* ===== 具体的な「やること」(確認リスト・席ごとのやること) ===== */
+const CHECK={
+  work:[
+    {t:'条件を数字で比べる',h:'年収(手取り)・賞与・残業時間・通勤時間を、いまの職場と並べて表にする。求人票ではなく、雇用条件の書面で確認する。'},
+    {t:'入社後の仕事内容と評価の基準',h:'最初の半年に何を任され、何で評価されるのかを、採用担当か上長に質問して、答えをメモする。'},
+    {t:'そこで働く人の話',h:'1人でよいので、実際に働いている人や辞めた人に、良い点と大変な点を聞く。'},
+    {t:'いまの職場で変えられる余地',h:'異動・条件の相談・業務の見直しを、上司に一度話してみたか確認する。話していなければ、先にそれを試す。'},
+    {t:'動くと失うもの',h:'退職金・有給・役職・人間関係など、動くと失うものを書き出して、それぞれ許容できるか○×を付ける。'},
+    {t:'うまくいかなかったときの戻り先',h:'1年後にうまくいかなかった場合の、戻り先と、貯蓄で何か月暮らせるかを書く。'}
+  ],
+  money:[
+    {t:'総額を出す',h:'初期費用・毎月の費用・解約時の費用を全部足して、1年と3年の総額を出す。'},
+    {t:'相見積もりを取る',h:'同じ条件で2社以上に見積もりを依頼して、並べて比べる。'},
+    {t:'契約書の条件を読む',h:'解約の条件・手数料・最低期間・自動更新を、契約書の文面で確認する。口頭の説明は当てにしない。'},
+    {t:'家計への影響',h:'毎月の収支に組み込んだとき、いちばん厳しい月でも払えるか確かめる。'},
+    {t:'元が取れる根拠',h:'いつ・どうやって回収できるのかを、根拠のある数字だけで書く。期待や見込みは含めない。'},
+    {t:'詳しい人に1人聞く',h:'税理士・FP・経験者など、利害のない詳しい人に1人聞く。'}
+  ],
+  home:[
+    {t:'住む人全員の希望',h:'一緒に住む人に、1人ずつ希望と不安を聞いて、書き出す。'},
+    {t:'毎月の総額',h:'家賃・管理費・光熱費・駐車場に、引っ越し費用を足して、現在と比べる。'},
+    {t:'現地を確かめる',h:'通勤・通学・買い物・病院を、平日と休日に実際に歩くか乗って確かめる。昼と夜にも見に行く。'},
+    {t:'契約と更新の条件',h:'更新・解約・原状回復の条件を、契約書の文面で確認する。'},
+    {t:'動ける時期',h:'いまの契約の解約予告の期限(何か月前)を確認して、動ける時期を逆算する。'},
+    {t:'周辺の様子',h:'雨の日に1回、周辺を見に行く。近隣の声は、管理会社か住民に聞く。'}
+  ],
+  love:[
+    {t:'自分の気持ちを書き出す',h:'その人といるときの気持ちと、いないときの気持ちを、3つずつ書く。'},
+    {t:'事実と思い込みを分ける',h:'相手が実際に言ったこと・したことと、自分の推測を、2列に分けて書く。'},
+    {t:'価値観のすり合わせ',h:'お金・暮らし・将来(結婚・子ども・住む場所)で、違いを確かめられているか確認する。まだなら、1つだけ話してみる。'},
+    {t:'第三者の意見',h:'利害のない友人か家族に1人、率直な意見を聞く。'},
+    {t:'譲れない条件',h:'譲れないこと3つと、譲れること3つを書く。'},
+    {t:'話す日を決める',h:'いつまでに自分から話すか、日付を決める。'}
+  ],
+  learn:[
+    {t:'半年後の姿',h:'これを始めて、半年後にどうなっていたいかを、1文で書く。'},
+    {t:'費用と時間',h:'総額と、毎週かけられる時間を、現実的な数字で出す。'},
+    {t:'体験する',h:'体験会・無料講座・短期コースで、小さく試す。'},
+    {t:'経験者に聞く',h:'実際にやった人に1人、良かった点と後悔した点を聞く。'},
+    {t:'やめる基準',h:'どうなったらやめるかを、始める前に決めておく。'},
+    {t:'減らすもの',h:'いまやっていることのうち、1つ減らせるものを決める。'}
+  ],
+  life:[
+    {t:'いまの習慣を記録する',h:'1週間、時間と回数をメモして、現状を数字で見る。'},
+    {t:'続かなかった理由',h:'過去に続かなかった理由を、3つ書く。'},
+    {t:'2週間の小さな実験',h:'変更案を2週間だけ試して、続けられたかを記録する。'},
+    {t:'続けやすくする仕組み',h:'場所・時間・道具を決めて、始めるまでの手間を減らす。'},
+    {t:'測り方',h:'成果を測る数字を、1つだけ決める。'},
+    {t:'一緒にやる人',h:'報告する相手か、一緒にやる人を1人決める。'}
+  ],
+  general:[
+    {t:'分かっていること・いないこと',h:'分かっている事実と、分かっていないことを、2列に分けて書く。'},
+    {t:'数字で書く',h:'費用・時間・期限を、数字で書き出す。'},
+    {t:'詳しい人に1人聞く',h:'利害のない詳しい人に1人、意見を聞く。'},
+    {t:'最悪の場合',h:'最悪の場合に何が起きるか、そこから戻れるかを書く。'},
+    {t:'小さく試す',h:'全部を決めずに、一部だけ試せないか考える。'},
+    {t:'決める日',h:'いつまでに決めるか、日付を決める。'}
+  ]
+};
+const PY_ACT={1:'新しいことは、小さく始めて、早めに反応を見ます。',2:'結論を急がず、関係者2人に話を聞いて、情報を集めます。',3:'人に話しながら考えると進みます。話した内容を、1行でメモします。',4:'仕組みと数字を整えます。手順・費用・期限を、紙に書き出します。',5:'変化に向く年ですが、衝動的な決断は避けて、1日置いてから決めます。',6:'身近な人への影響を確認します。関係者に一度話してから決めます。',7:'調べて学ぶ年です。経験者の話や資料を読んで、判断材料を増やします。',8:'お金と契約を確認します。金額・解約条件・責任の範囲を、文面で確かめます。',9:'区切りをつける年です。終わらせるもの、手放すものを、1つ決めます。'};
+const AS_ACT={
+  jupiter:{soft:'期待が膨らみやすい時期です。動くなら、金額や期間の上限を、先に決めます。',hard:'見積りが甘くなりやすい時期です。数字を一度、人に見せて確認します。'},
+  saturn:{soft:'地道な確認が実を結ぶ時期です。契約書や条件を、1行ずつ読みます。',hard:'負担や制約に気づきやすい時期です。条件と期限を書き出して、確認します。'},
+  uranus:{soft:'新しい選択肢が出やすい時期です。急がず、候補を2つ以上並べて比べます。',hard:'予定外の変更が入りやすい時期です。予備日と戻り先を、用意しておきます。'},
+  neptune:{soft:'直感が冴える時期です。ただし、決める前に数字で裏を取ります。',hard:'情報が曖昧になりやすい時期です。口頭の約束は、文書で確認します。'},
+  pluto:{soft:'大きな変化に向く時期です。後戻りできる範囲を決めてから、進めます。',hard:'強い圧力に流されやすい時期です。返事は、一晩置いてからにします。'}
+};
+function seatTodo(k,v){
+  if(k==='shi'){
+    const f=v.flow;
+    if(f&&f.month&&f.month.tone==='n')return '今月は向かい風です。実行は来月以降に置いて、今月は確認と準備に使います。';
+    if(f&&f.month&&f.month.tone==='y'&&v.stance!=='n')return '今月は追い風です。確認が済めば、今月中に動くのに向いています。';
+    return {y:'動くなら、先に実行日を決めておきます。',n:'決断を急がず、準備と確認を先に進めます。',h:'実行日は、下の月の帯で追い風の月に置いて、それまでに確認を終えます。'}[v.stance];
+  }
+  if(k==='star'){
+    const w=v.wheel&&Array.isArray(v.wheel.tr)?v.wheel.tr[0]:null;
+    let s='';
+    if(w&&AS_ACT[w.k])s=AS_ACT[w.k][w.c==='hard'?'hard':'soft']||'';
+    if(!s)s='大きな星の影響は弱い時期です。ほかの席の読みを優先してください。';
+    if(v.retro)s+=' 水星が逆行中なので、契約や提出の前に、内容を読み直します。';
+    return s;
+  }
+  if(k==='num')return PY_ACT[v.py]||'';
+  if(Array.isArray(v.cards)&&v.cards[1]&&v.cards[2]&&TAROT[v.cards[1].idx]&&TAROT[v.cards[2].idx]){
+    return 'つまずきやすい点は「'+v.cards[1].kw+'」です。心当たりを1つ書き出します。助言の「'+v.cards[2].kw+'」は、今週の行動に1つ落とし込みます。';
+  }
+  if(TAROT[v.idx])return '札の「'+v.kw+'」を、今週の行動に1つ落とし込みます。';
+  return '';
+}
+function todoHtml(k,v){const t=seatTodo(k,v);return t?'<p class="todo"><b>この席からのやること</b>'+esc(t)+'</p>':'';}
+function planDate(log){
+  if(log.deadline)return {d:fmtDay(log.deadline),own:true};
+  const d=new Date(log.at);d.setDate(d.getDate()+14);
+  return {d:d.toLocaleDateString('ja-JP',{year:'numeric',month:'numeric',day:'numeric'}),own:false};
+}
+function planHtml(log){
+  const key=log.verdict.key, cat=CHECK[log.cat]?log.cat:'general';
+  const base=CHECK[cat].slice();
+  const special=[];
+  const tv=log.votes.tarot;
+  if((key==='wait'||key==='split'||key==='lean_go'||key==='lean_stay')&&tv&&Array.isArray(tv.cards)&&tv.cards[1]){
+    special.push({t:'障害の札「'+tv.cards[1].kw+'」の心当たり',h:'タロットが示したつまずきやすい点です。当てはまることを1つ書き出してください。それが、最初に確かめるべきことの候補になります。'});
+  }
+  const sv=log.votes.star;
+  if(sv&&sv.retro)special.push({t:'契約・提出の前の読み直し',h:'水星が逆行中です。申込や契約は、内容を読み直す時間を取って、その場で確定しないようにします。'});
+  const all=special.concat(base);
+  const top=all.slice(0,3), rest=all.slice(3);
+  const pd=planDate(log);
+  const A=log.optA, B=log.optB||'今のまま';
+  const lead={
+    wait:'全席が様子見です。「動くか止めるか」の前に、確かめたいことが残っている状態です。下の3つを確かめれば、次の相談で結論が出しやすくなります。',
+    split:'席の意見が割れたのは、まだ確かめていない点があるからです。下の3つを確かめて、割れ目を埋めましょう。',
+    lean_go:'動く寄りですが、反対の席が気にしている点を、先に確かめてから動きましょう。',
+    lean_stay:'見送り寄りです。見送る前に、賛成の席が見ていた可能性を、下の確認で試しておきましょう。',
+    go:'動く方向でそろいました。動く前に、最後の確認を済ませましょう。',
+    stay:'見送る方向でそろいました。見送りで納得できるか、下の確認で試しておきましょう。'
+  }[key];
+  const t1=base[0].t, t2=base[1]?base[1].t:base[0].t, tt=top[0].t;
+  const rule={
+    wait:'もし「'+t1+'」と「'+t2+'」に問題がなければ、「'+A+'」を実行します。問題があれば、「'+B+'」を続けます。',
+    split:'もし「'+t1+'」と「'+t2+'」に問題がなければ、「'+A+'」を実行します。問題があれば、「'+B+'」を続けます。',
+    lean_go:'「'+t1+'」に問題がなければ、「'+A+'」を実行します。問題が見つかったら、小さく試す形に変えます。',
+    go:'「'+t1+'」に問題がなければ、「'+A+'」を実行します。問題が見つかったら、実行を延ばします。',
+    lean_stay:'基本は「'+B+'」を続けます。「'+t1+'」を確かめて、動く理由が見つかったら、「'+A+'」に戻すか、もう一度相談します。',
+    stay:'基本は「'+B+'」を続けます。「'+t1+'」を確かめて、動く理由が見つかったら、「'+A+'」を再検討します。'
+  }[key];
+  const items=top.map(function(x){return '<li><b>'+esc(x.t)+'</b><span>'+esc(x.h)+'</span></li>';}).join('');
+  const more=rest.length?'<details class="more"><summary>ほかの確認候補('+rest.length+')</summary><ol class="chk" style="margin-top:8px;counter-reset:chk 3">'+rest.map(function(x){return '<li><b>'+esc(x.t)+'</b><span>'+esc(x.h)+'</span></li>';}).join('')+'</ol></details>':'';
+  return '<section class="panel"><h2>何を確かめるか(確認リスト)</h2><p>'+esc(lead)+'</p><ol class="chk">'+items+'</ol>'+more+
+    '<div class="rule"><b>判断のルール</b><p>'+esc(rule)+'</p><p class="hint">'+(pd.own?'期限: ':'期限が未設定なので、2週間後を目安に: ')+esc(pd.d)+'までに確かめて、決めます。</p></div>'+
+    '<p class="todo"><b>今日の5分でできること</b>'+esc('「'+tt+'」について、分かっていることを、メモに3行で書き出します。')+'</p>'+
+    '<div class="btns"><button class="btn" type="button" data-act="continue" data-id="'+esc(log.id)+'">確かめたら、続きを相談する</button></div></section>';
+}
+
 function viewResult(log){
   const v=log.verdict;
   const present=SEATS.filter(function(s){return log.votes[s.k];});
@@ -1637,6 +1781,7 @@ function viewResult(log){
   handHtml(log)+
   '<section class="seats" aria-label="席ごとの投票">'+KEYS.map(function(k){return seatHtml(k,log);}).join('')+'</section>'+
   '<section class="panel"><h2>四席の声をまとめる</h2><div class="points">'+points+'</div></section>'+
+  planHtml(log)+
   '<section class="panel"><h2>動くのに向く月(巡りの帯)</h2>'+stripHtml(log)+'</section>'+
   '<section class="panel"><h2>次の一手(星の助言)</h2><ol class="steps">'+NEXT[v.key].map(function(t){return '<li>'+esc(t)+'</li>';}).join('')+'</ol>'+
   '<details><summary>計算について</summary><ul>'+
